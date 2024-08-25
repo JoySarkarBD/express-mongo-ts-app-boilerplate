@@ -14,26 +14,26 @@ The Resource Generator CLI is a command-line tool designed to streamline the cre
 
 ## Installation
 
-To use the CLI tool, clone the repository and install the dependencies.
+**To use the CLI tool, clone the repository and install the dependencies.**
 
 ```bash
 git clone <repository-url>
 cd <repository-directory>
 ```
 
-To install dependencies using npm:
+**To install dependencies using npm**:
 
 ```bash
 npm install
 ```
 
-To install dependencies using Yarn:
+**To install dependencies using Yarn**:
 
 ```bash
 yarn install
 ```
 
-To install dependencies using pnpm:
+**To install dependencies using pnpm**:
 
 ```bash
 pnpm install
@@ -41,21 +41,21 @@ pnpm install
 
 ## Usage
 
-The CLI tool can be executed using the following command:
+**The CLI tool can be executed using the following command(direct resource)**:
 
-By using npm:
+**By using npm**:
 
 ```bash
 npm run generate <resource-name>
 ```
 
-By using yarn:
+**By using yarn**:
 
 ```bash
 yarn run generate <resource-name>
 ```
 
-By using pnpm:
+**By using pnpm**:
 
 ```bash
 pnpm run generate <resource-name>
@@ -231,6 +231,32 @@ export const validateUserId = (req: Request, res: Response, next: NextFunction) 
   return next();
 };
 ```
+
+---
+
+### Nested CLI Commands
+
+The CLI tool can be executed using the following command(nested resource):
+
+**By using npm**:
+
+```bash
+npm run generate folder1/folder2/<resource-name>
+```
+
+**By using yarn**:
+
+```bash
+yarn run generate folder1/folder2/<resource-name>
+```
+
+**By using pnpm**:
+
+```bash
+pnpm run generate folder1/folder2/<resource-name>
+```
+
+**It will act same like the previous command but it will generate the resources as nested you want.**
 
 ## Contact
 
