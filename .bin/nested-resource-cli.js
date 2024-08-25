@@ -9,38 +9,31 @@ const GREEN = '\x1b[32m'; // Green color
 const BLUE = '\x1b[34m'; // Blue color
 const RESET = '\x1b[0m'; // Reset color
 
-// Command-line options setup
 program
-  .version('1.0.0') // Version of the CLI tool
-  .description('Generate route, model, controller, and interface files for a new resource') // Description of the tool
-  .argument('<name>', 'Resource name') // Argument for resource name
-  .action((name) => {
-    // Convert resource name to lowercase
-    const resourceName = name.toLowerCase();
-    // Capitalize resource name
+  .version('1.0.0')
+  .description('Generate nested route, model, controller, and interface files for a new resource')
+  .argument('<path>', 'Nested path to resource (e.g., folder1/folder2/resourceName)')
+  .action((nestedPath) => {
+    const parts = nestedPath.split('/');
+    const resourceName = parts.pop().toLowerCase();
+    const nestedFolders = parts;
     const capitalizedResourceName = capitalize(resourceName);
-    // Path to the route directory
-    const routeDir = path.join(__dirname, '..', 'src', 'routes', resourceName);
-    // Path to the controller directory
-    const controllerDir = path.join(__dirname, '..', 'src', 'modules', resourceName);
-    // Path to the interface directory
-    const interfaceDir = path.join(__dirname, '..', 'src', 'modules', resourceName);
-    // Path to the model directory
-    const modelsDir = path.join(__dirname, '..', 'src', 'modules', resourceName);
-    // Path to the validation directory
-    const validationDir = path.join(__dirname, '..', 'src', 'modules', resourceName);
+
+    const baseDir = path.join(__dirname, '..', 'src');
+    const routeDir = path.join(baseDir, 'routes', ...nestedFolders, resourceName);
+    const moduleDir = path.join(baseDir, 'modules', ...nestedFolders, resourceName);
 
     // Function to format file paths relative to project root
     const formatPath = (filePath) => path.relative(path.join(__dirname, '..'), filePath);
 
-    // Create the resource directories if they don't exist
-    [routeDir, controllerDir, modelsDir, interfaceDir].forEach((dir) => {
+    // Create the nested directories
+    [routeDir, moduleDir].forEach((dir) => {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
     });
 
-    // Create route file content
+    // Create route file content (similar to the original, adjusted for nested structure)
     const routeContent = `
 // Import Router from express
 import { Router } from 'express';
@@ -55,15 +48,19 @@ import {
   deleteMany${capitalizedResourceName},
   get${capitalizedResourceName}ById,
   getMany${capitalizedResourceName}
-} from '../../modules/${resourceName}/${resourceName}.controller';
-import { validate${capitalizedResourceName}Id } from '../../modules/${resourceName}/${resourceName}.validation';
-
+} from '${Array(nestedFolders.length + 2)
+      .fill('..')
+      .join('/')}/modules/${nestedFolders.join('/')}/${resourceName}/${resourceName}.controller';
+import { validate${capitalizedResourceName}Id } from '${Array(nestedFolders.length + 2)
+      .fill('..')
+      .join('/')}/modules/${nestedFolders.join('/')}/${resourceName}/${resourceName}.validation';
+      
 // Initialize router
 const router = Router();
 
 // Define route handlers
 /**
- * @route POST /api/v1/${resourceName}/create-${resourceName}
+ * @route POST /api/v1/${nestedFolders.join('/')}/${resourceName}/create-${resourceName}
  * @description Create a new ${resourceName}
  * @access Public
  * @param {function} controller - ['create${capitalizedResourceName}']
@@ -71,7 +68,7 @@ const router = Router();
 router.post("/create-${resourceName}", create${capitalizedResourceName});
 
 /**
- * @route POST /api/v1/${resourceName}/create-${resourceName}/many
+ * @route POST /api/v1/${nestedFolders.join('/')}/${resourceName}/create-${resourceName}/many
  * @description Create multiple ${resourceName}s
  * @access Public
  * @param {function} controller - ['createMany${capitalizedResourceName}']
@@ -79,7 +76,7 @@ router.post("/create-${resourceName}", create${capitalizedResourceName});
 router.post("/create-${resourceName}/many", createMany${capitalizedResourceName});
 
 /**
- * @route PUT /api/v1/${resourceName}/update-${resourceName}/many
+ * @route PUT /api/v1/${nestedFolders.join('/')}/${resourceName}/update-${resourceName}/many
  * @description Update multiple ${resourceName}s
  * @access Public
  * @param {function} controller - ['updateMany${capitalizedResourceName}']
@@ -87,7 +84,7 @@ router.post("/create-${resourceName}/many", createMany${capitalizedResourceName}
 router.put("/update-${resourceName}/many", updateMany${capitalizedResourceName});
 
 /**
- * @route PUT /api/v1/${resourceName}/update-${resourceName}/:id
+ * @route PUT /api/v1/${nestedFolders.join('/')}/${resourceName}/update-${resourceName}/:id
  * @description Update ${resourceName} information
  * @param {string} id - The ID of the ${resourceName} to update
  * @access Public
@@ -98,7 +95,7 @@ router.put("/update-${resourceName}/:id", validate${capitalizedResourceName}Id, 
 
 
 /**
- * @route DELETE /api/v1/${resourceName}/delete-${resourceName}/many
+ * @route DELETE /api/v1/${nestedFolders.join('/')}/${resourceName}/delete-${resourceName}/many
  * @description Delete multiple ${resourceName}s
  * @access Public
  * @param {function} controller - ['deleteMany${capitalizedResourceName}']
@@ -106,7 +103,7 @@ router.put("/update-${resourceName}/:id", validate${capitalizedResourceName}Id, 
 router.delete("/delete-${resourceName}/many", deleteMany${capitalizedResourceName});
 
 /**
- * @route DELETE /api/v1/${resourceName}/delete-${resourceName}/:id
+ * @route DELETE /api/v1/${nestedFolders.join('/')}/${resourceName}/delete-${resourceName}/:id
  * @description Delete a ${resourceName}
  * @param {string} id - The ID of the ${resourceName} to delete
  * @access Public
@@ -116,7 +113,7 @@ router.delete("/delete-${resourceName}/many", deleteMany${capitalizedResourceNam
 router.delete("/delete-${resourceName}/:id", validate${capitalizedResourceName}Id, delete${capitalizedResourceName});
 
 /**
- * @route GET /api/v1/${resourceName}/get-${resourceName}/many
+ * @route GET /api/v1/${nestedFolders.join('/')}/${resourceName}/get-${resourceName}/many
  * @description Get multiple ${resourceName}s
  * @access Public
  * @param {function} controller - ['getMany${capitalizedResourceName}']
@@ -124,7 +121,7 @@ router.delete("/delete-${resourceName}/:id", validate${capitalizedResourceName}I
 router.get("/get-${resourceName}/many", getMany${capitalizedResourceName});
 
 /**
- * @route GET /api/v1/${resourceName}/get-${resourceName}/:id
+ * @route GET /api/v1/${nestedFolders.join('/')}/${resourceName}/get-${resourceName}/:id
  * @description Get a ${resourceName} by ID
  * @param {string} id - The ID of the ${resourceName} to retrieve
  * @access Public
@@ -139,13 +136,14 @@ module.exports = router;
 
     // Path to the route file
     const routeFilePath = path.join(routeDir, 'index.ts');
-    // Write content to the route file
     fs.writeFileSync(routeFilePath, routeContent.trim());
 
-    // Create controller file content
+    // Create controller file content (similar to the original)
     const controllerContent = `
 import { Request, Response } from 'express';
-import ServerResponse from '../../helpers/responses/custom-response';
+import ServerResponse from '${Array(nestedFolders.length + 2)
+      .fill('..')
+      .join('/')}/helpers/responses/custom-response';
 
 /**
  * Controller function to handle the create operation for ${capitalizedResourceName}.
@@ -280,68 +278,49 @@ export const getMany${capitalizedResourceName} = async (req: Request, res: Respo
     `;
 
     // Path to the controller file
-    const controllerFilePath = path.join(controllerDir, `${resourceName}.controller.ts`);
-    // Write content to the controller file
+    const controllerFilePath = path.join(moduleDir, `${resourceName}.controller.ts`);
     fs.writeFileSync(controllerFilePath, controllerContent.trim());
 
-    // Create model file
+    // Create model file (similar to the original)
     const modelContent = `
 import mongoose, { Document, Schema } from 'mongoose';
 
-// Define an interface representing a ${capitalizedResourceName} document
 interface I${capitalizedResourceName} extends Document {
   // Define the schema fields with their types
-  // Example fields (replace with actual fields)
-  // fieldName: fieldType;
 }
 
-// Define the ${capitalizedResourceName} schema
 const ${capitalizedResourceName}Schema: Schema<I${capitalizedResourceName}> = new Schema({
   // Define schema fields here
-  // Example fields (replace with actual schema)
-  // fieldName: {
-  //   type: Schema.Types.FieldType,
-  //   required: true,
-  //   trim: true,
-  // },
 });
 
-// Create the ${capitalizedResourceName} model
 const ${capitalizedResourceName} = mongoose.model<I${capitalizedResourceName}>('${capitalizedResourceName}', ${capitalizedResourceName}Schema);
 
-// Export the ${capitalizedResourceName} model
 export default ${capitalizedResourceName};
     `;
 
     // Path to the model file
-    const modelFilePath = path.join(modelsDir, `${resourceName}.model.ts`);
-    // Write content to the model file
+    const modelFilePath = path.join(moduleDir, `${resourceName}.model.ts`);
     fs.writeFileSync(modelFilePath, modelContent.trim());
 
-    // Create interface file content
+    // Create interface file content (similar to the original)
     const interfaceContent = `
-/**
- * Type definition for ${capitalizedResourceName}.
- *
- * This type defines the structure of a single ${resourceName} object.
- * @interface T${capitalizedResourceName}
- */
 export interface T${capitalizedResourceName} {
   // Add fields as needed
 }
     `;
 
     // Path to the interface file
-    const interfaceFilePath = path.join(interfaceDir, `${resourceName}.interface.ts`);
-    // Write content to the interface file
+    const interfaceFilePath = path.join(moduleDir, `${resourceName}.interface.ts`);
     fs.writeFileSync(interfaceFilePath, interfaceContent.trim());
 
-    // Create Zod validation schema file
+    // Create Zod validation schema file (similar to the original)
     const validationContent = `
 import { NextFunction, Request, Response } from 'express';
 import { isMongoId } from 'validator';
 import { z } from 'zod';
-import zodErrorHandler from '../../handlers/zod-error-handler';
+import zodErrorHandler from '${Array(nestedFolders.length + 2)
+      .fill('..')
+      .join('/')}/handlers/zod-error-handler';
 
 /**
  * Zod schema for validating ${resourceName} data.
@@ -363,7 +342,7 @@ const zod${capitalizedResourceName}Schema = z.object({
       message: "At least one ID must be provided",
     }),
 }).strict();
-    
+
 /**
  * Middleware function to validate ${resourceName} ID using Zod schema.
  * @param {object} req - The request object.
@@ -384,42 +363,27 @@ export const validate${capitalizedResourceName}Id = (req: Request, res: Response
   // If validation passed, proceed to the next middleware function
   return next();
 };
-
-
-
-
-`;
+    `;
 
     // Path to the zod validation file
-    const validationFilePath = path.join(validationDir, `${resourceName}.validation.ts`);
-    // Write content to the validation file
+    const validationFilePath = path.join(moduleDir, `${resourceName}.validation.ts`);
     fs.writeFileSync(validationFilePath, validationContent.trim());
 
-    // Log the creation of the route, controller, interface, model & validation files
+    // Log the creation of the files
     console.log(
-      `${GREEN}CREATE ${RESET}${formatPath(
-        routeFilePath
-      )} ${BLUE}(${Buffer.byteLength(routeContent, 'utf8')} bytes)`
+      `${GREEN}CREATE ${RESET}${formatPath(routeFilePath)} ${BLUE}(${Buffer.byteLength(routeContent, 'utf8')} bytes)`
     );
     console.log(
-      `${GREEN}CREATE ${RESET}${formatPath(
-        controllerFilePath
-      )} ${BLUE}(${Buffer.byteLength(controllerContent, 'utf8')} bytes)`
+      `${GREEN}CREATE ${RESET}${formatPath(controllerFilePath)} ${BLUE}(${Buffer.byteLength(controllerContent, 'utf8')} bytes)`
     );
     console.log(
-      `${GREEN}CREATE ${RESET}${formatPath(
-        interfaceFilePath
-      )} ${BLUE}(${Buffer.byteLength(interfaceContent, 'utf8')} bytes)`
+      `${GREEN}CREATE ${RESET}${formatPath(interfaceFilePath)} ${BLUE}(${Buffer.byteLength(interfaceContent, 'utf8')} bytes)`
     );
     console.log(
-      `${GREEN}CREATE ${RESET}${formatPath(
-        modelFilePath
-      )} ${BLUE}(${Buffer.byteLength(modelContent, 'utf8')} bytes)`
+      `${GREEN}CREATE ${RESET}${formatPath(modelFilePath)} ${BLUE}(${Buffer.byteLength(modelContent, 'utf8')} bytes)`
     );
     console.log(
-      `${GREEN}CREATE ${RESET}${formatPath(
-        validationFilePath
-      )} ${BLUE}(${Buffer.byteLength(validationContent, 'utf8')} bytes)`
+      `${GREEN}CREATE ${RESET}${formatPath(validationFilePath)} ${BLUE}(${Buffer.byteLength(validationContent, 'utf8')} bytes)`
     );
   });
 

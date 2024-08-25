@@ -12,10 +12,12 @@
     "prettier": "prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:fix": "prettier --write 'src/**/*.{ts,tsx}'",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "resource": "node ./.bin/cli.js"
+    "resource": "node ./.bin/resource-cli.js",
+    "nested-resource": "node ./.bin/nested-resource-cli.js"
   },
   "bin": {
-    "resource": "./bin/cli.js"
+    "resource": "./bin/resource-cli.js",
+    "nested-resource": "./bin/nested-resource-cli.js"
   },
   "keywords": [],
   "author": "",

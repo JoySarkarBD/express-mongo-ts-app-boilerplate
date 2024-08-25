@@ -45,20 +45,27 @@ app.use(limiter);
 // Serve static files from the public directory
 app.use(express.static(publicDirPath));
 
-// Dynamically load routes
-const routesPath = path.join(__dirname, 'routes');
+// Recursive function to load routes from nested folders
+const loadRoutes = (basePath: string, baseRoute: string) => {
+  if (fs.existsSync(basePath)) {
+    fs.readdirSync(basePath).forEach((item) => {
+      const itemPath = path.join(basePath, item);
+      const routePrefix = `${baseRoute}/${item}`;
 
-fs.readdirSync(routesPath).forEach((folder) => {
-  const folderPath = path.join(routesPath, folder);
-
-  if (fs.statSync(folderPath).isDirectory()) {
-    const routePrefix = `/api/v1/${folder}`;
-    const routeFile = path.join(folderPath, 'index.ts');
-
-    // Load the route file dynamically
-    app.use(routePrefix, require(routeFile));
+      if (fs.statSync(itemPath).isDirectory()) {
+        // Recursively load routes for nested folders
+        loadRoutes(itemPath, routePrefix);
+      } else if (item === 'index.ts' || item === 'index.js') {
+        // Dynamically load the route file
+        app.use(baseRoute, require(itemPath));
+      }
+    });
   }
-});
+};
+
+// Load routes starting from the 'routes' directory
+const routesPath = path.join(__dirname, 'routes');
+loadRoutes(routesPath, '/api/v1');
 
 // Serve an image file on the root route
 app.get('/', (req: Request, res: Response) => {
