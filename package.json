@@ -1,5 +1,5 @@
 {
-  "name": "express-app-boilertplate-ts",
+  "name": "express-mongo-app-boilerplate-ts",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -19,7 +19,24 @@
     "resource": "./bin/resource-cli.js",
     "nested-resource": "./bin/nested-resource-cli.js"
   },
-  "keywords": [],
+  "keywords": [
+    "express",
+    "mongoose",
+    "mongodb",
+    "bcrypt",
+    "cookie-parser",
+    "cors",
+    "dotenv",
+    "express-mongo-sanitize",
+    "express-rate-limit",
+    "helmet",
+    "hpp",
+    "jsonwebtoken",
+    "morgan",
+    "nodemailer",
+    "validator",
+    "zod"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
