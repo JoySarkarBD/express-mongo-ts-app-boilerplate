@@ -16,7 +16,7 @@ const ServerResponse = (
   statusCode: number,
   message: string,
   data?: object | null,
-  errors?: any[],
+  errors?: any[] | null,
   error?: any
 ): Response => {
   return res.status(statusCode).json({

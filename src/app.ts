@@ -46,25 +46,54 @@ app.use(limiter);
 app.use(express.static(publicDirPath));
 
 // Recursive function to load routes from nested folders
+export const routes: { path: string; method: string; time: number }[] = [];
+
 const loadRoutes = (basePath: string, baseRoute: string) => {
   if (fs.existsSync(basePath)) {
     fs.readdirSync(basePath).forEach((item) => {
       const itemPath = path.join(basePath, item);
-      const routePrefix = `${baseRoute}/${item}`;
+      const routePrefix = `${baseRoute}/${item.replace('.route', '')}`;
 
       if (fs.statSync(itemPath).isDirectory()) {
         // Recursively load routes for nested folders
         loadRoutes(itemPath, routePrefix);
-      } else if (item === 'index.ts' || item === 'index.js') {
+      } else if (item.endsWith('.route.ts') || item.endsWith('.route.js')) {
         // Dynamically load the route file
         app.use(baseRoute, require(itemPath));
+
+        // Measure the loading time of each route
+        const start = performance.now();
+
+        // Dynamically load the route file
+        const routeModule = require(itemPath);
+
+        const end = performance.now();
+        const loadTime = end - start;
+
+        if (routeModule) {
+          // Capture route paths and methods
+          routeModule.stack.forEach((layer: any) => {
+            if (layer.route) {
+              const methods = Object.keys(layer.route.methods).map((method) =>
+                method.toUpperCase()
+              );
+              methods.forEach((method) => {
+                routes.push({
+                  path: `${baseRoute}${layer.route.path}`,
+                  method,
+                  time: loadTime,
+                });
+              });
+            }
+          });
+        }
       }
     });
   }
 };
 
-// Load routes starting from the 'routes' directory
-const routesPath = path.join(__dirname, 'routes');
+// Load routes starting from the 'modules' directory
+const routesPath = path.join(__dirname, 'modules');
 loadRoutes(routesPath, '/api/v1');
 
 // Serve an image file on the root route
