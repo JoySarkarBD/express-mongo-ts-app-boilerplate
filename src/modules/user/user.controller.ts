@@ -18,7 +18,7 @@ export const createUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 /**
- * Controller function to handle the creation of multiple users.
+ * Controller function to handle the creation of multiple user.
  *
  * @param {Request} req - The request object containing an array of user data in the body.
  * @param {Response} res - The response object used to send the response.
@@ -32,7 +32,7 @@ export const createManyUser = catchAsync(async (req: Request, res: Response) => 
 });
 
 /**
- * Controller function to handle the update operation for a single User.
+ * Controller function to handle the update operation for a single user.
  *
  * @param {Request} req - The request object containing the ID of the user to update in URL parameters and the updated data in the body.
  * @param {Response} res - The response object used to send the response.
@@ -47,21 +47,21 @@ export const updateUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 /**
- * Controller function to handle the update operation for multiple users.
+ * Controller function to handle the update operation for multiple user.
  *
  * @param {Request} req - The request object containing an array of user data in the body.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const updateManyUser = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to update multiple users and get the result
+  // Call the service method to update multiple user and get the result
   const result = await userServices.updateManyUser(req.body);
   // Send a success response with the updated resources data
   ServerResponse(res, true, 200, 'Resources updated successfully', result);
 });
 
 /**
- * Controller function to handle the deletion of a single User.
+ * Controller function to handle the deletion of a single user.
  *
  * @param {Request} req - The request object containing the ID of the user to delete in URL parameters.
  * @param {Response} res - The response object used to send the response.
@@ -76,21 +76,21 @@ export const deleteUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 /**
- * Controller function to handle the deletion of multiple users.
+ * Controller function to handle the deletion of multiple user.
  *
- * @param {Request} req - The request object containing an array of IDs of users to delete in the body.
+ * @param {Request} req - The request object containing an array of IDs of user to delete in the body.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const deleteManyUser = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to delete multiple users and get the result
+  // Call the service method to delete multiple user and get the result
   await userServices.deleteManyUser(req.body);
   // Send a success response confirming the deletions
   ServerResponse(res, true, 200, 'Resources deleted successfully');
 });
 
 /**
- * Controller function to handle the retrieval of a single User by ID.
+ * Controller function to handle the retrieval of a single user by ID.
  *
  * @param {Request} req - The request object containing the ID of the user to retrieve in URL parameters.
  * @param {Response} res - The response object used to send the response.
@@ -105,14 +105,14 @@ export const getUserById = catchAsync(async (req: Request, res: Response) => {
 });
 
 /**
- * Controller function to handle the retrieval of multiple users.
+ * Controller function to handle the retrieval of multiple user.
  *
  * @param {Request} req - The request object containing query parameters for filtering.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const getManyUser = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to get multiple users based on query parameters and get the result
+  // Call the service method to get multiple user based on query parameters and get the result
   const result = await userServices.getManyUser(req.query);
   // Send a success response with the retrieved resources data
   ServerResponse(res, true, 200, 'Resources retrieved successfully', result);

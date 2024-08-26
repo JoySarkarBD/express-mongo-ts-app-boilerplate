@@ -12,6 +12,8 @@ import {
   getUserById,
   getManyUser
 } from './user.controller';
+
+//Import validation from corresponding module
 import { validateUserId } from './user.validation';
 
 // Initialize router
@@ -28,7 +30,7 @@ router.post("/create-user", createUser);
 
 /**
  * @route POST /api/v1/user/create-user/many
- * @description Create multiple users
+ * @description Create multiple user
  * @access Public
  * @param {function} controller - ['createManyUser']
  */
@@ -36,7 +38,7 @@ router.post("/create-user/many", createManyUser);
 
 /**
  * @route PUT /api/v1/user/update-user/many
- * @description Update multiple users
+ * @description Update multiple user information
  * @access Public
  * @param {function} controller - ['updateManyUser']
  */
@@ -55,7 +57,7 @@ router.put("/update-user/:id", validateUserId, updateUser);
 
 /**
  * @route DELETE /api/v1/user/delete-user/many
- * @description Delete multiple users
+ * @description Delete multiple user
  * @access Public
  * @param {function} controller - ['deleteManyUser']
  */
@@ -73,7 +75,7 @@ router.delete("/delete-user/:id", validateUserId, deleteUser);
 
 /**
  * @route GET /api/v1/user/get-user/many
- * @description Get multiple users
+ * @description Get multiple user
  * @access Public
  * @param {function} controller - ['getManyUser']
  */

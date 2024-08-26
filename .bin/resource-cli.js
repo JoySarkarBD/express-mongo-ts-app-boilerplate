@@ -15,22 +15,22 @@ program
   .description('Generate route, model, controller, and interface files for a new resource') // Description of the tool
   .argument('<name>', 'Resource name') // Argument for resource name
   .action((name) => {
-    // Convert resource name to lowercase
-    const resourceName = name.toLowerCase();
-    // Capitalize resource name
+    // Convert resource name to camelCase if it contains '-' or '_'
+    const resourceName =
+      name.includes('-') || name.includes('_') ? toCamelCase(name) : name.toLowerCase();
     const capitalizedResourceName = capitalize(resourceName);
     // Path to the route directory
-    const routeDir = path.join(__dirname, '..', 'src', 'modules', resourceName);
+    const routeDir = path.join(__dirname, '..', 'src', 'modules', name);
     // Path to the controller directory
-    const controllerDir = path.join(__dirname, '..', 'src', 'modules', resourceName);
+    const controllerDir = path.join(__dirname, '..', 'src', 'modules', name);
     // Path to the interface directory
-    const interfaceDir = path.join(__dirname, '..', 'src', 'modules', resourceName);
+    const interfaceDir = path.join(__dirname, '..', 'src', 'modules', name);
     // Path to the model directory
-    const modelsDir = path.join(__dirname, '..', 'src', 'modules', resourceName);
+    const modelsDir = path.join(__dirname, '..', 'src', 'modules', name);
     // Path to the validation directory
-    const validationDir = path.join(__dirname, '..', 'src', 'modules', resourceName);
+    const validationDir = path.join(__dirname, '..', 'src', 'modules', name);
     // Path to the service directory
-    const serviceDir = path.join(__dirname, '..', 'src', 'modules', resourceName);
+    const serviceDir = path.join(__dirname, '..', 'src', 'modules', name);
 
     // Function to format file paths relative to project root
     const formatPath = (filePath) => path.relative(path.join(__dirname, '..'), filePath);
@@ -57,120 +57,120 @@ import {
   deleteMany${capitalizedResourceName},
   get${capitalizedResourceName}ById,
   getMany${capitalizedResourceName}
-} from './${resourceName}.controller';
+} from './${name}.controller';
 
 //Import validation from corresponding module
-import { validate${capitalizedResourceName}Id } from './${resourceName}.validation';
+import { validate${capitalizedResourceName}Id } from './${name}.validation';
 
 // Initialize router
 const router = Router();
 
 // Define route handlers
 /**
- * @route POST /api/v1/${resourceName}/create-${resourceName}
- * @description Create a new ${resourceName}
+ * @route POST /api/v1/${name}/create-${name}
+ * @description Create a new ${name}
  * @access Public
  * @param {function} controller - ['create${capitalizedResourceName}']
  */
-router.post("/create-${resourceName}", create${capitalizedResourceName});
+router.post("/create-${name}", create${capitalizedResourceName});
 
 /**
- * @route POST /api/v1/${resourceName}/create-${resourceName}/many
- * @description Create multiple ${resourceName}s
+ * @route POST /api/v1/${name}/create-${name}/many
+ * @description Create multiple ${name}
  * @access Public
  * @param {function} controller - ['createMany${capitalizedResourceName}']
  */
-router.post("/create-${resourceName}/many", createMany${capitalizedResourceName});
+router.post("/create-${name}/many", createMany${capitalizedResourceName});
 
 /**
- * @route PUT /api/v1/${resourceName}/update-${resourceName}/many
- * @description Update multiple ${resourceName}s
+ * @route PUT /api/v1/${name}/update-${name}/many
+ * @description Update multiple ${name} information
  * @access Public
  * @param {function} controller - ['updateMany${capitalizedResourceName}']
  */
-router.put("/update-${resourceName}/many", updateMany${capitalizedResourceName});
+router.put("/update-${name}/many", updateMany${capitalizedResourceName});
 
 /**
- * @route PUT /api/v1/${resourceName}/update-${resourceName}/:id
- * @description Update ${resourceName} information
- * @param {string} id - The ID of the ${resourceName} to update
+ * @route PUT /api/v1/${name}/update-${name}/:id
+ * @description Update ${name} information
+ * @param {string} id - The ID of the ${name} to update
  * @access Public
  * @param {function} controller - ['update${capitalizedResourceName}']
  * @param {function} validation - ['validate${capitalizedResourceName}Id']
  */
-router.put("/update-${resourceName}/:id", validate${capitalizedResourceName}Id, update${capitalizedResourceName});
+router.put("/update-${name}/:id", validate${capitalizedResourceName}Id, update${capitalizedResourceName});
 
 
 /**
- * @route DELETE /api/v1/${resourceName}/delete-${resourceName}/many
- * @description Delete multiple ${resourceName}s
+ * @route DELETE /api/v1/${name}/delete-${name}/many
+ * @description Delete multiple ${name}
  * @access Public
  * @param {function} controller - ['deleteMany${capitalizedResourceName}']
  */
-router.delete("/delete-${resourceName}/many", deleteMany${capitalizedResourceName});
+router.delete("/delete-${name}/many", deleteMany${capitalizedResourceName});
 
 /**
- * @route DELETE /api/v1/${resourceName}/delete-${resourceName}/:id
- * @description Delete a ${resourceName}
- * @param {string} id - The ID of the ${resourceName} to delete
+ * @route DELETE /api/v1/${name}/delete-${name}/:id
+ * @description Delete a ${name}
+ * @param {string} id - The ID of the ${name} to delete
  * @access Public
  * @param {function} controller - ['delete${capitalizedResourceName}']
  * @param {function} validation - ['validate${capitalizedResourceName}Id']
  */
-router.delete("/delete-${resourceName}/:id", validate${capitalizedResourceName}Id, delete${capitalizedResourceName});
+router.delete("/delete-${name}/:id", validate${capitalizedResourceName}Id, delete${capitalizedResourceName});
 
 /**
- * @route GET /api/v1/${resourceName}/get-${resourceName}/many
- * @description Get multiple ${resourceName}s
+ * @route GET /api/v1/${name}/get-${name}/many
+ * @description Get multiple ${name}
  * @access Public
  * @param {function} controller - ['getMany${capitalizedResourceName}']
  */
-router.get("/get-${resourceName}/many", getMany${capitalizedResourceName});
+router.get("/get-${name}/many", getMany${capitalizedResourceName});
 
 /**
- * @route GET /api/v1/${resourceName}/get-${resourceName}/:id
- * @description Get a ${resourceName} by ID
- * @param {string} id - The ID of the ${resourceName} to retrieve
+ * @route GET /api/v1/${name}/get-${name}/:id
+ * @description Get a ${name} by ID
+ * @param {string} id - The ID of the ${name} to retrieve
  * @access Public
  * @param {function} controller - ['get${capitalizedResourceName}ById']
  * @param {function} validation - ['validate${capitalizedResourceName}Id']
  */
-router.get("/get-${resourceName}/:id", validate${capitalizedResourceName}Id, get${capitalizedResourceName}ById);
+router.get("/get-${name}/:id", validate${capitalizedResourceName}Id, get${capitalizedResourceName}ById);
 
 // Export the router
 module.exports = router;
     `;
 
     // Path to the route file
-    const routeFilePath = path.join(routeDir, `${resourceName}.route.ts`);
+    const routeFilePath = path.join(routeDir, `${name}.route.ts`);
     // Write content to the route file
     fs.writeFileSync(routeFilePath, routeContent.trim());
 
     // Create controller file content
     const controllerContent = `
 import { Request, Response } from 'express';
-import { ${resourceName}Services } from './${resourceName}.service';
+import { ${resourceName}Services } from './${name}.service';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
 
 /**
  * Controller function to handle the creation of a single ${capitalizedResourceName}.
  *
- * @param {Request} req - The request object containing ${resourceName} data in the body.
+ * @param {Request} req - The request object containing ${name} data in the body.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const create${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to create a new ${resourceName} and get the result
+  // Call the service method to create a new ${name} and get the result
   const result = await ${resourceName}Services.create${capitalizedResourceName}(req.body);
   // Send a success response with the created resource data
   ServerResponse(res, true, 201, '${capitalizedResourceName} created successfully', result);
 });
 
 /**
- * Controller function to handle the creation of multiple ${resourceName}s.
+ * Controller function to handle the creation of multiple ${name}.
  *
- * @param {Request} req - The request object containing an array of ${resourceName} data in the body.
+ * @param {Request} req - The request object containing an array of ${name} data in the body.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
@@ -182,87 +182,87 @@ export const createMany${capitalizedResourceName} = catchAsync(async (req: Reque
 });
 
 /**
- * Controller function to handle the update operation for a single ${capitalizedResourceName}.
+ * Controller function to handle the update operation for a single ${name}.
  *
- * @param {Request} req - The request object containing the ID of the ${resourceName} to update in URL parameters and the updated data in the body.
+ * @param {Request} req - The request object containing the ID of the ${name} to update in URL parameters and the updated data in the body.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const update${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  // Call the service method to update the ${resourceName} by ID and get the result
+  // Call the service method to update the ${name} by ID and get the result
   const result = await ${resourceName}Services.update${capitalizedResourceName}(id, req.body);
   // Send a success response with the updated resource data
   ServerResponse(res, true, 200, '${capitalizedResourceName} updated successfully', result);
 });
 
 /**
- * Controller function to handle the update operation for multiple ${resourceName}s.
+ * Controller function to handle the update operation for multiple ${name}.
  *
- * @param {Request} req - The request object containing an array of ${resourceName} data in the body.
+ * @param {Request} req - The request object containing an array of ${name} data in the body.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const updateMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to update multiple ${resourceName}s and get the result
+  // Call the service method to update multiple ${name} and get the result
   const result = await ${resourceName}Services.updateMany${capitalizedResourceName}(req.body);
   // Send a success response with the updated resources data
   ServerResponse(res, true, 200, 'Resources updated successfully', result);
 });
 
 /**
- * Controller function to handle the deletion of a single ${capitalizedResourceName}.
+ * Controller function to handle the deletion of a single ${name}.
  *
- * @param {Request} req - The request object containing the ID of the ${resourceName} to delete in URL parameters.
+ * @param {Request} req - The request object containing the ID of the ${name} to delete in URL parameters.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const delete${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  // Call the service method to delete the ${resourceName} by ID
+  // Call the service method to delete the ${name} by ID
   await ${resourceName}Services.delete${capitalizedResourceName}(id);
   // Send a success response confirming the deletion
   ServerResponse(res, true, 200, '${capitalizedResourceName} deleted successfully');
 });
 
 /**
- * Controller function to handle the deletion of multiple ${resourceName}s.
+ * Controller function to handle the deletion of multiple ${name}.
  *
- * @param {Request} req - The request object containing an array of IDs of ${resourceName}s to delete in the body.
+ * @param {Request} req - The request object containing an array of IDs of ${name} to delete in the body.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const deleteMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to delete multiple ${resourceName}s and get the result
+  // Call the service method to delete multiple ${name} and get the result
   await ${resourceName}Services.deleteMany${capitalizedResourceName}(req.body);
   // Send a success response confirming the deletions
   ServerResponse(res, true, 200, 'Resources deleted successfully');
 });
 
 /**
- * Controller function to handle the retrieval of a single ${capitalizedResourceName} by ID.
+ * Controller function to handle the retrieval of a single ${name} by ID.
  *
- * @param {Request} req - The request object containing the ID of the ${resourceName} to retrieve in URL parameters.
+ * @param {Request} req - The request object containing the ID of the ${name} to retrieve in URL parameters.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const get${capitalizedResourceName}ById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  // Call the service method to get the ${resourceName} by ID and get the result
+  // Call the service method to get the ${name} by ID and get the result
   const result = await ${resourceName}Services.get${capitalizedResourceName}ById(id);
   // Send a success response with the retrieved resource data
   ServerResponse(res, true, 200, '${capitalizedResourceName} retrieved successfully', result);
 });
 
 /**
- * Controller function to handle the retrieval of multiple ${resourceName}s.
+ * Controller function to handle the retrieval of multiple ${name}.
  *
  * @param {Request} req - The request object containing query parameters for filtering.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const getMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to get multiple ${resourceName}s based on query parameters and get the result
+  // Call the service method to get multiple ${name} based on query parameters and get the result
   const result = await ${resourceName}Services.getMany${capitalizedResourceName}(req.query);
   // Send a success response with the retrieved resources data
   ServerResponse(res, true, 200, 'Resources retrieved successfully', result);
@@ -270,7 +270,7 @@ export const getMany${capitalizedResourceName} = catchAsync(async (req: Request,
     `;
 
     // Path to the controller file
-    const controllerFilePath = path.join(controllerDir, `${resourceName}.controller.ts`);
+    const controllerFilePath = path.join(controllerDir, `${name}.controller.ts`);
     // Write content to the controller file
     fs.writeFileSync(controllerFilePath, controllerContent.trim());
 
@@ -304,7 +304,7 @@ export default ${capitalizedResourceName};
     `;
 
     // Path to the model file
-    const modelFilePath = path.join(modelsDir, `${resourceName}.model.ts`);
+    const modelFilePath = path.join(modelsDir, `${name}.model.ts`);
     // Write content to the model file
     fs.writeFileSync(modelFilePath, modelContent.trim());
 
@@ -322,7 +322,7 @@ export interface T${capitalizedResourceName} {
     `;
 
     // Path to the interface file
-    const interfaceFilePath = path.join(interfaceDir, `${resourceName}.interface.ts`);
+    const interfaceFilePath = path.join(interfaceDir, `${name}.interface.ts`);
     // Write content to the interface file
     fs.writeFileSync(interfaceFilePath, interfaceContent.trim());
 
@@ -377,14 +377,14 @@ export const validate${capitalizedResourceName}Id = (req: Request, res: Response
     `;
 
     // Path to the zod validation file
-    const validationFilePath = path.join(validationDir, `${resourceName}.validation.ts`);
+    const validationFilePath = path.join(validationDir, `${name}.validation.ts`);
     // Write content to the validation file
     fs.writeFileSync(validationFilePath, validationContent.trim());
 
     // Create service content
     const serviceContent = `
 // Import the model
-import ${capitalizedResourceName}Model from './${resourceName}.model'; 
+import ${capitalizedResourceName}Model from './${name}.model'; 
 
 /**
  * Service function to create a new ${resourceName}.
@@ -398,10 +398,10 @@ const create${capitalizedResourceName} = async (data: object) => {
 };
 
 /**
- * Service function to create multiple ${resourceName}s.
+ * Service function to create multiple ${resourceName}.
  *
- * @param data - An array of data to create multiple ${resourceName}s.
- * @returns {Promise<${capitalizedResourceName}[]>} - The created ${resourceName}s.
+ * @param data - An array of data to create multiple ${resourceName}.
+ * @returns {Promise<${capitalizedResourceName}[]>} - The created ${resourceName}.
  */
 const createMany${capitalizedResourceName} = async (data: object[]) => {
   return await ${capitalizedResourceName}Model.insertMany(data);
@@ -419,10 +419,10 @@ const update${capitalizedResourceName} = async (id: string, data: object) => {
 };
 
 /**
- * Service function to update multiple ${resourceName}s.
+ * Service function to update multiple ${resourceName}.
  *
- * @param data - An array of data to update multiple ${resourceName}s.
- * @returns {Promise<${capitalizedResourceName}[]>} - The updated ${resourceName}s.
+ * @param data - An array of data to update multiple ${resourceName}.
+ * @returns {Promise<${capitalizedResourceName}[]>} - The updated ${resourceName}.
  */
 const updateMany${capitalizedResourceName} = async (data: { id: string, updates: object }[]) => {
   const updatePromises = data.map(({ id, updates }) =>
@@ -442,10 +442,10 @@ const delete${capitalizedResourceName} = async (id: string) => {
 };
 
 /**
- * Service function to delete multiple ${resourceName}s.
+ * Service function to delete multiple ${resourceName}.
  *
- * @param ids - An array of IDs of ${resourceName}s to delete.
- * @returns {Promise<${capitalizedResourceName}[]>} - The deleted ${resourceName}s.
+ * @param ids - An array of IDs of ${resourceName} to delete.
+ * @returns {Promise<${capitalizedResourceName}[]>} - The deleted ${resourceName}.
  */
 const deleteMany${capitalizedResourceName} = async (ids: string[]) => {
   return await ${capitalizedResourceName}Model.deleteMany({ _id: { $in: ids } });
@@ -462,10 +462,10 @@ const get${capitalizedResourceName}ById = async (id: string) => {
 };
 
 /**
- * Service function to retrieve multiple ${resourceName}s based on query parameters.
+ * Service function to retrieve multiple ${resourceName} based on query parameters.
  *
- * @param query - The query parameters for filtering ${resourceName}s.
- * @returns {Promise<${capitalizedResourceName}[]>} - The retrieved ${resourceName}s.
+ * @param query - The query parameters for filtering ${resourceName}.
+ * @returns {Promise<${capitalizedResourceName}[]>} - The retrieved ${resourceName}.
  */
 const getMany${capitalizedResourceName} = async (query: object) => {
   return await ${capitalizedResourceName}Model.find(query);
@@ -485,7 +485,7 @@ export const ${resourceName}Services = {
     `;
 
     // Path to the service file
-    const serviceFilePath = path.join(serviceDir, `${resourceName}.service.ts`);
+    const serviceFilePath = path.join(serviceDir, `${name}.service.ts`);
     // Write content to the service file
     fs.writeFileSync(serviceFilePath, serviceContent.trim());
 
@@ -527,4 +527,9 @@ program.parse(process.argv);
 // Helper function to capitalize the first letter of a string
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Helper function to convert hyphenated strings to camelCase
+function toCamelCase(str) {
+  return str.replace(/-([a-z])/g, (match, p1) => p1.toUpperCase());
 }

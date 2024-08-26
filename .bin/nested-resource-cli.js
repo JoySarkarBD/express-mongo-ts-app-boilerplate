@@ -15,9 +15,18 @@ program
   .argument('<path>', 'Nested path to resource (e.g., folder1/folder2/resourceName)')
   .action((nestedPath) => {
     const parts = nestedPath.split('/');
-    const resourceName = parts.pop().toLowerCase();
+
+    // Convert the last part of the path to camelCase if it contains '-' or '_'
+    const resourceName = parts.pop();
+    const resourceCamelCaseName =
+      resourceName.includes('-') || resourceName.includes('_')
+        ? toCamelCase(resourceName)
+        : resourceName;
+
+    console.log(resourceName);
+
     const nestedFolders = parts;
-    const capitalizedResourceName = capitalize(resourceName);
+    const capitalizedResourceName = capitalize(resourceCamelCaseName);
 
     const baseDir = path.join(__dirname, '..', 'src');
 
@@ -65,7 +74,7 @@ router.post("/create-${resourceName}", create${capitalizedResourceName});
 
 /**
  * @route POST /api/v1/${nestedFolders.join('/')}/${resourceName}/create-${resourceName}/many
- * @description Create multiple ${resourceName}s
+ * @description Create multiple ${resourceName}
  * @access Public
  * @param {function} controller - ['createMany${capitalizedResourceName}']
  */
@@ -73,7 +82,7 @@ router.post("/create-${resourceName}/many", createMany${capitalizedResourceName}
 
 /**
  * @route PUT /api/v1/${nestedFolders.join('/')}/${resourceName}/update-${resourceName}/many
- * @description Update multiple ${resourceName}s
+ * @description Update multiple ${resourceName} information
  * @access Public
  * @param {function} controller - ['updateMany${capitalizedResourceName}']
  */
@@ -92,7 +101,7 @@ router.put("/update-${resourceName}/:id", validate${capitalizedResourceName}Id, 
 
 /**
  * @route DELETE /api/v1/${nestedFolders.join('/')}/${resourceName}/delete-${resourceName}/many
- * @description Delete multiple ${resourceName}s
+ * @description Delete multiple ${resourceName}
  * @access Public
  * @param {function} controller - ['deleteMany${capitalizedResourceName}']
  */
@@ -110,7 +119,7 @@ router.delete("/delete-${resourceName}/:id", validate${capitalizedResourceName}I
 
 /**
  * @route GET /api/v1/${nestedFolders.join('/')}/${resourceName}/get-${resourceName}/many
- * @description Get multiple ${resourceName}s
+ * @description Get multiple ${resourceName}
  * @access Public
  * @param {function} controller - ['getMany${capitalizedResourceName}']
  */
@@ -137,7 +146,7 @@ module.exports = router;
     // Create controller file content (similar to the original)
     const controllerContent = `
 import { Request, Response } from 'express';
-import { ${resourceName}Services } from './${resourceName}.service';
+import { ${resourceCamelCaseName}Services } from './${resourceName}.service';
 import ServerResponse from '${Array(nestedFolders.length + 2)
       .fill('..')
       .join('/')}/helpers/responses/custom-response';
@@ -154,21 +163,21 @@ import catchAsync from '${Array(nestedFolders.length + 2)
  */
 export const create${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create a new ${resourceName} and get the result
-  const result = await ${resourceName}Services.create${capitalizedResourceName}(req.body);
+  const result = await ${resourceCamelCaseName}Services.create${capitalizedResourceName}(req.body);
   // Send a success response with the created resource data
   ServerResponse(res, true, 201, '${capitalizedResourceName} created successfully', result);
 });
 
 /**
- * Controller function to handle the creation of multiple ${resourceName}s.
+ * Controller function to handle the creation of multiple ${resourceName}.
  *
  * @param {Request} req - The request object containing an array of ${resourceName} data in the body.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const createMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to create multiple ${resourceName}s and get the result
-  const result = await ${resourceName}Services.createMany${capitalizedResourceName}(req.body);
+  // Call the service method to create multiple ${resourceName} and get the result
+  const result = await ${resourceCamelCaseName}Services.createMany${capitalizedResourceName}(req.body);
   // Send a success response with the created resources data
   ServerResponse(res, true, 201, 'Resources created successfully', result);
 });
@@ -183,21 +192,21 @@ export const createMany${capitalizedResourceName} = catchAsync(async (req: Reque
 export const update${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to update the ${resourceName} by ID and get the result
-  const result = await ${resourceName}Services.update${capitalizedResourceName}(id, req.body);
+  const result = await ${resourceCamelCaseName}Services.update${capitalizedResourceName}(id, req.body);
   // Send a success response with the updated resource data
   ServerResponse(res, true, 200, '${capitalizedResourceName} updated successfully', result);
 });
 
 /**
- * Controller function to handle the update operation for multiple ${resourceName}s.
+ * Controller function to handle the update operation for multiple ${resourceName}.
  *
  * @param {Request} req - The request object containing an array of ${resourceName} data in the body.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const updateMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to update multiple ${resourceName}s and get the result
-  const result = await ${resourceName}Services.updateMany${capitalizedResourceName}(req.body);
+  // Call the service method to update multiple ${resourceName} and get the result
+  const result = await ${resourceCamelCaseName}Services.updateMany${capitalizedResourceName}(req.body);
   // Send a success response with the updated resources data
   ServerResponse(res, true, 200, 'Resources updated successfully', result);
 });
@@ -212,21 +221,21 @@ export const updateMany${capitalizedResourceName} = catchAsync(async (req: Reque
 export const delete${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to delete the ${resourceName} by ID
-  await ${resourceName}Services.delete${capitalizedResourceName}(id);
+  await ${resourceCamelCaseName}Services.delete${capitalizedResourceName}(id);
   // Send a success response confirming the deletion
   ServerResponse(res, true, 200, '${capitalizedResourceName} deleted successfully');
 });
 
 /**
- * Controller function to handle the deletion of multiple ${resourceName}s.
+ * Controller function to handle the deletion of multiple ${resourceName}.
  *
- * @param {Request} req - The request object containing an array of IDs of ${resourceName}s to delete in the body.
+ * @param {Request} req - The request object containing an array of IDs of ${resourceName} to delete in the body.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const deleteMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to delete multiple ${resourceName}s and get the result
-  await ${resourceName}Services.deleteMany${capitalizedResourceName}(req.body);
+  // Call the service method to delete multiple ${resourceName} and get the result
+  await ${resourceCamelCaseName}Services.deleteMany${capitalizedResourceName}(req.body);
   // Send a success response confirming the deletions
   ServerResponse(res, true, 200, 'Resources deleted successfully');
 });
@@ -241,21 +250,21 @@ export const deleteMany${capitalizedResourceName} = catchAsync(async (req: Reque
 export const get${capitalizedResourceName}ById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to get the ${resourceName} by ID and get the result
-  const result = await ${resourceName}Services.get${capitalizedResourceName}ById(id);
+  const result = await ${resourceCamelCaseName}Services.get${capitalizedResourceName}ById(id);
   // Send a success response with the retrieved resource data
   ServerResponse(res, true, 200, '${capitalizedResourceName} retrieved successfully', result);
 });
 
 /**
- * Controller function to handle the retrieval of multiple ${resourceName}s.
+ * Controller function to handle the retrieval of multiple ${resourceName}.
  *
  * @param {Request} req - The request object containing query parameters for filtering.
  * @param {Response} res - The response object used to send the response.
  * @returns {void}
  */
 export const getMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to get multiple ${resourceName}s based on query parameters and get the result
-  const result = await ${resourceName}Services.getMany${capitalizedResourceName}(req.query);
+  // Call the service method to get multiple ${resourceName} based on query parameters and get the result
+  const result = await ${resourceCamelCaseName}Services.getMany${capitalizedResourceName}(req.query);
   // Send a success response with the retrieved resources data
   ServerResponse(res, true, 200, 'Resources retrieved successfully', result);
 });
@@ -372,8 +381,8 @@ const create${capitalizedResourceName} = async (data: object) => {
 /**
  * Service function to create multiple ${resourceName}s.
  *
- * @param data - An array of data to create multiple ${resourceName}s.
- * @returns {Promise<${capitalizedResourceName}[]>} - The created ${resourceName}s.
+ * @param data - An array of data to create multiple ${resourceName}.
+ * @returns {Promise<${capitalizedResourceName}[]>} - The created ${resourceName}.
  */
 const createMany${capitalizedResourceName} = async (data: object[]) => {
   return await ${capitalizedResourceName}Model.insertMany(data);
@@ -391,10 +400,10 @@ const update${capitalizedResourceName} = async (id: string, data: object) => {
 };
 
 /**
- * Service function to update multiple ${resourceName}s.
+ * Service function to update multiple ${resourceName}.
  *
- * @param data - An array of data to update multiple ${resourceName}s.
- * @returns {Promise<${capitalizedResourceName}[]>} - The updated ${resourceName}s.
+ * @param data - An array of data to update multiple ${resourceName}.
+ * @returns {Promise<${capitalizedResourceName}[]>} - The updated ${resourceName}.
  */
 const updateMany${capitalizedResourceName} = async (data: { id: string, updates: object }[]) => {
   const updatePromises = data.map(({ id, updates }) =>
@@ -414,10 +423,10 @@ const delete${capitalizedResourceName} = async (id: string) => {
 };
 
 /**
- * Service function to delete multiple ${resourceName}s.
+ * Service function to delete multiple ${resourceName}.
  *
- * @param ids - An array of IDs of ${resourceName}s to delete.
- * @returns {Promise<${capitalizedResourceName}[]>} - The deleted ${resourceName}s.
+ * @param ids - An array of IDs of ${resourceName} to delete.
+ * @returns {Promise<${capitalizedResourceName}[]>} - The deleted ${resourceName}.
  */
 const deleteMany${capitalizedResourceName} = async (ids: string[]) => {
   return await ${capitalizedResourceName}Model.deleteMany({ _id: { $in: ids } });
@@ -434,16 +443,16 @@ const get${capitalizedResourceName}ById = async (id: string) => {
 };
 
 /**
- * Service function to retrieve multiple ${resourceName}s based on query parameters.
+ * Service function to retrieve multiple ${resourceName} based on query parameters.
  *
- * @param query - The query parameters for filtering ${resourceName}s.
- * @returns {Promise<${capitalizedResourceName}[]>} - The retrieved ${resourceName}s.
+ * @param query - The query parameters for filtering ${resourceName}.
+ * @returns {Promise<${capitalizedResourceName}[]>} - The retrieved ${resourceName}.
  */
 const getMany${capitalizedResourceName} = async (query: object) => {
   return await ${capitalizedResourceName}Model.find(query);
 };
 
-export const ${resourceName}Services = {
+export const ${resourceCamelCaseName}Services = {
   create${capitalizedResourceName},
   createMany${capitalizedResourceName},
   update${capitalizedResourceName},
@@ -489,4 +498,9 @@ program.parse(process.argv);
 // Helper function to capitalize the first letter of a string
 function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Helper function to convert hyphenated strings to camelCase
+function toCamelCase(str) {
+  return str.replace(/-([a-z])/g, (match, p1) => p1.toUpperCase());
 }
