@@ -6,10 +6,11 @@ The Resource Generator CLI is a command-line tool designed to streamline the cre
 
 ## Features
 
-- **Generate Route Files**: Create route files with standard RESTful endpoints for the specified resource.
 - **Generate Controller Files**: Create controller files with basic CRUD operations and response handling.
-- **Generate Model Files**: Create Mongoose model files with a defined schema.
 - **Generate Interface Files**: Create TypeScript interface files defining the structure of the resource.
+- **Generate Model Files**: Create Mongoose model files with a defined schema.
+- **Generate Route Files**: Create route files with standard RESTful endpoints for the specified resource.
+- **Generate Service Files**: Create service files include standard RESTful endpoints for managing resources.
 - **Generate Validation Files**: Create Zod validation schemas and middleware for request validation.
 
 ## Installation
