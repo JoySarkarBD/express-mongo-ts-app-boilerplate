@@ -47,19 +47,19 @@ pnpm install
 **By using npm**:
 
 ```bash
-npm run generate <resource-name>
+npm run resource <resource-name>
 ```
 
 **By using yarn**:
 
 ```bash
-yarn run generate <resource-name>
+yarn run resource <resource-name>
 ```
 
 **By using pnpm**:
 
 ```bash
-pnpm run generate <resource-name>
+pnpm run resource <resource-name>
 ```
 
 ### Command Arguments
@@ -71,7 +71,7 @@ pnpm run generate <resource-name>
 To generate files for a resource named `user`, run:
 
 ```bash
-npm run generate user
+npm run resource user
 ```
 
 This will create the following files:
@@ -285,19 +285,19 @@ The CLI tool can be executed using the following command(nested resource):
 **By using npm**:
 
 ```bash
-npm run generate folder1/folder2/<resource-name>
+npm run nested-resource folder1/folder2/<resource-name>
 ```
 
 **By using yarn**:
 
 ```bash
-yarn run generate folder1/folder2/<resource-name>
+yarn run nested-resource folder1/folder2/<resource-name>
 ```
 
 **By using pnpm**:
 
 ```bash
-pnpm run generate folder1/folder2/<resource-name>
+pnpm run nested-resource folder1/folder2/<resource-name>
 ```
 
 **It will act same like the previous command but it will generate the resources as nested you want.**
