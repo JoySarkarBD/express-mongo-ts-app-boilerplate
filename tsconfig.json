@@ -12,9 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "typeRoots": ["./node_modules/@types" /* "./src/app/interface" */] // Add this line
+    "typeRoots": ["./node_modules/@types"]
   },
   "include": ["src"],
   "exclude": ["node_modules"]
-  // "files": ["./src/app/interface/index.d.ts"]
 }
