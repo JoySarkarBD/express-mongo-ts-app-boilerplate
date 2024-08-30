@@ -298,7 +298,7 @@ export default User;
 import { Router } from 'express';
 
 // Import controller from corresponding module
-import { 
+import {
   createUser,
   createManyUser,
   updateUser,
@@ -306,7 +306,7 @@ import {
   deleteUser,
   deleteManyUser,
   getUserById,
-  getManyUser
+  getManyUser,
 } from './user.controller';
 
 //Import validation from corresponding module
@@ -322,7 +322,7 @@ const router = Router();
  * @access Public
  * @param {function} controller - ['createUser']
  */
-router.post("/create-user", createUser);
+router.post('/create-user', createUser);
 
 /**
  * @route POST /api/v1/user/create-user/many
@@ -330,7 +330,7 @@ router.post("/create-user", createUser);
  * @access Public
  * @param {function} controller - ['createManyUser']
  */
-router.post("/create-user/many", createManyUser);
+router.post('/create-user/many', createManyUser);
 
 /**
  * @route PUT /api/v1/user/update-user/many
@@ -338,7 +338,7 @@ router.post("/create-user/many", createManyUser);
  * @access Public
  * @param {function} controller - ['updateManyUser']
  */
-router.put("/update-user/many", updateManyUser);
+router.put('/update-user/many', updateManyUser);
 
 /**
  * @route PUT /api/v1/user/update-user/:id
@@ -348,8 +348,7 @@ router.put("/update-user/many", updateManyUser);
  * @param {function} controller - ['updateUser']
  * @param {function} validation - ['validateUserId']
  */
-router.put("/update-user/:id", validateUserId, updateUser);
-
+router.put('/update-user/:id', validateUserId, updateUser);
 
 /**
  * @route DELETE /api/v1/user/delete-user/many
@@ -357,7 +356,7 @@ router.put("/update-user/:id", validateUserId, updateUser);
  * @access Public
  * @param {function} controller - ['deleteManyUser']
  */
-router.delete("/delete-user/many", deleteManyUser);
+router.delete('/delete-user/many', deleteManyUser);
 
 /**
  * @route DELETE /api/v1/user/delete-user/:id
@@ -367,7 +366,7 @@ router.delete("/delete-user/many", deleteManyUser);
  * @param {function} controller - ['deleteUser']
  * @param {function} validation - ['validateUserId']
  */
-router.delete("/delete-user/:id", validateUserId, deleteUser);
+router.delete('/delete-user/:id', validateUserId, deleteUser);
 
 /**
  * @route GET /api/v1/user/get-user/many
@@ -375,7 +374,7 @@ router.delete("/delete-user/:id", validateUserId, deleteUser);
  * @access Public
  * @param {function} controller - ['getManyUser']
  */
-router.get("/get-user/many", getManyUser);
+router.get('/get-user/many', getManyUser);
 
 /**
  * @route GET /api/v1/user/get-user/:id
@@ -385,7 +384,7 @@ router.get("/get-user/many", getManyUser);
  * @param {function} controller - ['getUserById']
  * @param {function} validation - ['validateUserId']
  */
-router.get("/get-user/:id", validateUserId, getUserById);
+router.get('/get-user/:id', validateUserId, getUserById);
 
 // Export the router
 module.exports = router;
@@ -395,7 +394,7 @@ module.exports = router;
 
 ```typescript
 // Import the model
-import UserModel from './user.model'; 
+import UserModel from './user.model';
 
 /**
  * Service function to create a new user.
@@ -435,7 +434,7 @@ const updateUser = async (id: string, data: object) => {
  * @param data - An array of data to update multiple user.
  * @returns {Promise<User[]>} - The updated user.
  */
-const updateManyUser = async (data: { id: string, updates: object }[]) => {
+const updateManyUser = async (data: { id: string; updates: object }[]) => {
   const updatePromises = data.map(({ id, updates }) =>
     UserModel.findByIdAndUpdate(id, updates, { new: true })
   );
@@ -558,19 +557,19 @@ The CLI tool can be executed using the following command(nested resource):
 **By using npm**:
 
 ```bash
-npm run nested-resource folder1/folder2/<resource-name>
+npm run resource:nested folder1/folder2/<resource-name>
 ```
 
 **By using yarn**:
 
 ```bash
-yarn run nested-resource folder1/folder2/<resource-name>
+yarn run resource:nested folder1/folder2/<resource-name>
 ```
 
 **By using pnpm**:
 
 ```bash
-pnpm run nested-resource folder1/folder2/<resource-name>
+pnpm run resource:nested folder1/folder2/<resource-name>
 ```
 
 **It will act same like the previous command but it will generate the resources as nested you want.**
