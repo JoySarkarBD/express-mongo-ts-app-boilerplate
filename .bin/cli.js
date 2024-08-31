@@ -44,6 +44,40 @@ if (command === 'resource') {
         ? args[0].toLowerCase()
         : toCamelCase(args[0]);
 
+      const modelFileName = `${args[0]}.model.ts`;
+
+      function checkModelFile(args) {
+        function searchFile(dir) {
+          const files = fs.readdirSync(dir);
+
+          for (const file of files) {
+            const filePath = path.join(dir, file);
+            const stat = fs.statSync(filePath);
+
+            if (stat.isDirectory()) {
+              const found = searchFile(filePath);
+              if (found) return found;
+            } else if (file === modelFileName) {
+              return filePath;
+            }
+          }
+
+          return null;
+        }
+
+        const srcPath = path.join(process.cwd(), 'src');
+        const foundPath = searchFile(srcPath);
+
+        if (foundPath) {
+          return { exists: true, filePath: foundPath };
+        } else {
+          return { exists: false, filePath: null };
+        }
+      }
+
+      // Model exist or not checking
+      const modelExists = checkModelFile(process.argv.slice(2));
+
       const capitalizedResourceName = capitalize(resourceName);
 
       // Path to the route directory
@@ -332,8 +366,11 @@ export default ${capitalizedResourceName};
 
       // Path to the model file
       const modelFilePath = path.join(modelsDir, `${args[0]}.model.ts`);
-      // Write content to the model file
-      fs.writeFileSync(modelFilePath, modelContent.trim());
+
+      if (!modelExists.exists) {
+        // Write content to the model file
+        fs.writeFileSync(modelFilePath, modelContent.trim());
+      }
 
       // Create interface file content
       const interfaceContent = `
@@ -408,10 +445,14 @@ export const validate${capitalizedResourceName}Id = (req: Request, res: Response
       // Write content to the validation file
       fs.writeFileSync(validationFilePath, validationContent.trim());
 
+      const relativePath = modelExists?.filePath?.substring(
+        modelExists.filePath.indexOf('modules') + 'modules'.length + 1
+      );
+
       // Create service content
       const serviceContent = `
 // Import the model
-import ${capitalizedResourceName}Model from './${args[0]}.model'; 
+import ${capitalizedResourceName}Model from '${modelExists.exists ? `../${relativePath.replace(/\\/g, '/').replace(/\.ts$/, '')}` : `./${args[0]}.model`}';
 
 /**
  * Service function to create a new ${resourceName}.
@@ -527,11 +568,13 @@ export const ${resourceName}Services = {
           interfaceFilePath
         )} ${BLUE}(${Buffer.byteLength(interfaceContent, 'utf8')} bytes)`
       );
-      console.log(
-        `${GREEN}CREATE ${RESET}${formatPath(
-          modelFilePath
-        )} ${BLUE}(${Buffer.byteLength(modelContent, 'utf8')} bytes)`
-      );
+      if (!modelExists.exists) {
+        console.log(
+          `${GREEN}CREATE ${RESET}${formatPath(
+            modelFilePath
+          )} ${BLUE}(${Buffer.byteLength(modelContent, 'utf8')} bytes)`
+        );
+      }
       console.log(
         `${GREEN}CREATE ${RESET}${formatPath(
           routeFilePath
@@ -557,6 +600,40 @@ export const ${resourceName}Services = {
     .argument('<path>', 'Nested path to resource (e.g., folder1/folder2/resourceName)')
     .action((nestedPath) => {
       const parts = args[0].split('/');
+      const lastPart = parts[parts.length - 1];
+      const modelFileName = `${lastPart}.model.ts`;
+
+      function checkModelFile(args) {
+        function searchFile(dir) {
+          const files = fs.readdirSync(dir);
+
+          for (const file of files) {
+            const filePath = path.join(dir, file);
+            const stat = fs.statSync(filePath);
+
+            if (stat.isDirectory()) {
+              const found = searchFile(filePath);
+              if (found) return found;
+            } else if (file === modelFileName) {
+              return filePath;
+            }
+          }
+
+          return null;
+        }
+
+        const srcPath = path.join(process.cwd(), 'src');
+        const foundPath = searchFile(srcPath);
+
+        if (foundPath) {
+          return { exists: true, filePath: foundPath };
+        } else {
+          return { exists: false, filePath: null };
+        }
+      }
+
+      // Model exist or not checking
+      const modelExists = checkModelFile(process.argv.slice(2));
 
       // Convert the last part of the path to camelCase if it contains '-' or '_'
       const resourceName = parts.pop();
@@ -832,9 +909,11 @@ const ${capitalizedResourceName} = mongoose.model<I${capitalizedResourceName}>('
 export default ${capitalizedResourceName};
     `;
 
-      // Path to the model file
       const modelFilePath = path.join(moduleDir, `${resourceName}.model.ts`);
-      fs.writeFileSync(modelFilePath, modelContent.trim());
+      if (!modelExists.exists) {
+        // Path to the model file
+        fs.writeFileSync(modelFilePath, modelContent.trim());
+      }
 
       // Create interface file content (similar to the original)
       const interfaceContent = `
@@ -906,8 +985,13 @@ export const validate${capitalizedResourceName}Id = (req: Request, res: Response
       // Create service content
       const serviceContent = `
 // Import the model
-import ${capitalizedResourceName}Model from './${resourceName}.model'; 
-
+import ${capitalizedResourceName}Model from '${
+        modelExists.exists
+          ? `${Array(nestedFolders.length + 1)
+              .fill('..')
+              .join('/')}/${resourceName}/${resourceName}.model`
+          : `./${resourceName}.model`
+      }';
 /**
  * Service function to create a new ${resourceName}.
  *
@@ -1018,9 +1102,13 @@ export const ${resourceCamelCaseName}Services = {
       console.log(
         `${GREEN}CREATE ${RESET}${formatPath(interfaceFilePath)} ${BLUE}(${Buffer.byteLength(interfaceContent, 'utf8')} bytes)`
       );
-      console.log(
-        `${GREEN}CREATE ${RESET}${formatPath(modelFilePath)} ${BLUE}(${Buffer.byteLength(modelContent, 'utf8')} bytes)`
-      );
+
+      if (!modelExists.exists) {
+        fs.writeFileSync(modelFilePath, modelContent.trim());
+        console.log(
+          `${GREEN}CREATE ${RESET}${formatPath(modelFilePath)} ${BLUE}(${Buffer.byteLength(modelContent, 'utf8')} bytes)`
+        );
+      }
       console.log(
         `${GREEN}CREATE ${RESET}${formatPath(routeFilePath)} ${BLUE}(${Buffer.byteLength(routeContent, 'utf8')} bytes)`
       );
