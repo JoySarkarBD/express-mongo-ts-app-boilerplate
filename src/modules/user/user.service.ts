@@ -1,5 +1,5 @@
 // Import the model
-import UserModel from './user.model'; 
+import UserModel from './user.model';
 
 /**
  * Service function to create a new user.

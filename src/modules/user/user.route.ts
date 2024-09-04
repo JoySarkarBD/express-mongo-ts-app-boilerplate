@@ -54,7 +54,6 @@ router.put("/update-user/many", updateManyUser);
  */
 router.put("/update-user/:id", validateUserId, updateUser);
 
-
 /**
  * @route DELETE /api/v1/user/delete-user/many
  * @description Delete multiple user
