@@ -22,6 +22,7 @@
   "keywords": [
     "typescript",
     "express",
+    "express-fileupload",
     "mongoose",
     "mongodb",
     "bcrypt",
