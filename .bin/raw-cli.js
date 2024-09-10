@@ -415,7 +415,7 @@ const zod${capitalizedResourceName}Schema = z.object({
  * @returns {void}
  */
 export const validate${capitalizedResourceName} = (req: Request, res: Response, next: NextFunction) => {
-  // Validate request params
+  // Validate request body
   const { error, success } = zod${capitalizedResourceName}Schema.safeParse(req.body);
 
   // Check if validation was successful
@@ -944,7 +944,7 @@ const zod${capitalizedResourceName}Schema = z.object({
  * @returns {void}
  */
 export const validate${capitalizedResourceName} = (req: Request, res: Response, next: NextFunction) => {
-  // Validate request params
+  // Validate request body
   const { error, success } = zod${capitalizedResourceName}Schema.safeParse(req.body);
 
   // Check if validation was successful
