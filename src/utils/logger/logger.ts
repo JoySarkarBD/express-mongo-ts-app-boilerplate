@@ -22,10 +22,7 @@ if (!fs.existsSync(logDir)) {
 export const logMessage = (message: string) => {
   const now = new Date();
   const dateString = now.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-  const logDirForToday = path.join(
-    logDir,
-    `[${dateString}] MAC[${systemSanitizedMac}] USER[${systemUseName}]`
-  );
+  const logDirForToday = path.join(logDir, dateString);
   const logFileForToday = path.join(logDirForToday, 'access.log');
 
   // Ensure the directory for today's logs exists
