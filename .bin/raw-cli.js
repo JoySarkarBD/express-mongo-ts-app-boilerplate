@@ -160,9 +160,9 @@ router.put("/update-${args[0]}/many", validateIds, updateMany${capitalizedResour
  * @param {string} id - The ID of the ${args[0]} to update
  * @access Public
  * @param {function} controller - ['update${capitalizedResourceName}']
- * @param {function} validation - ['validateId']
+ * @param {function} validation - ['validateId', 'validate${capitalizedResourceName}']
  */
-router.put("/update-${args[0]}/:id", validateId, update${capitalizedResourceName});
+router.put("/update-${args[0]}/:id", validateId, validate${capitalizedResourceName}, update${capitalizedResourceName});
 
 /**
  * @route DELETE /api/v1/${args[0]}/delete-${args[0]}/many
@@ -706,9 +706,9 @@ router.put("/update-${resourceName}/many", validateIds, updateMany${capitalizedR
  * @param {string} id - The ID of the ${resourceName} to update
  * @access Public
  * @param {function} controller - ['update${capitalizedResourceName}']
- * @param {function} validation - ['validateId']
+ * @param {function} validation - ['validateId', 'validate${capitalizedResourceName}']
  */
-router.put("/update-${resourceName}/:id", validateId, update${capitalizedResourceName});
+router.put("/update-${resourceName}/:id", validateId, validate${capitalizedResourceName}, update${capitalizedResourceName});
 
 /**
  * @route DELETE /api/v1/${nestedFolders.join('/')}/${resourceName}/delete-${resourceName}/many

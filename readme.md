@@ -298,7 +298,7 @@ export default User;
 import { Router } from 'express';
 
 // Import controller from corresponding module
-import {
+import { 
   createUser,
   createManyUser,
   updateUser,
@@ -306,7 +306,7 @@ import {
   deleteUser,
   deleteManyUser,
   getUserById,
-  getManyUser,
+  getManyUser
 } from './user.controller';
 
 //Import validation from corresponding module
@@ -324,7 +324,7 @@ const router = Router();
  * @param {function} controller - ['createUser']
  * @param {function} validation - ['validateUser']
  */
-router.post('/create-user', validateUser, createUser);
+router.post("/create-user", validateUser, createUser);
 
 /**
  * @route POST /api/v1/user/create-user/many
@@ -332,7 +332,7 @@ router.post('/create-user', validateUser, createUser);
  * @access Public
  * @param {function} controller - ['createManyUser']
  */
-router.post('/create-user/many', createManyUser);
+router.post("/create-user/many", createManyUser);
 
 /**
  * @route PUT /api/v1/user/update-user/many
@@ -341,7 +341,7 @@ router.post('/create-user/many', createManyUser);
  * @param {function} controller - ['updateManyUser']
  * @param {function} validation - ['validateIds']
  */
-router.put('/update-user/many', validateIds, updateManyUser);
+router.put("/update-user/many", validateIds, updateManyUser);
 
 /**
  * @route PUT /api/v1/user/update-user/:id
@@ -349,9 +349,9 @@ router.put('/update-user/many', validateIds, updateManyUser);
  * @param {string} id - The ID of the user to update
  * @access Public
  * @param {function} controller - ['updateUser']
- * @param {function} validation - ['validateId']
+ * @param {function} validation - ['validateId', 'validateUser']
  */
-router.put('/update-user/:id', validateId, updateUser);
+router.put("/update-user/:id", validateId, validateUser, updateUser);
 
 /**
  * @route DELETE /api/v1/user/delete-user/many
@@ -360,7 +360,7 @@ router.put('/update-user/:id', validateId, updateUser);
  * @param {function} controller - ['deleteManyUser']
  * @param {function} validation - ['validateIds']
  */
-router.delete('/delete-user/many', validateIds, deleteManyUser);
+router.delete("/delete-user/many", validateIds, deleteManyUser);
 
 /**
  * @route DELETE /api/v1/user/delete-user/:id
@@ -370,7 +370,7 @@ router.delete('/delete-user/many', validateIds, deleteManyUser);
  * @param {function} controller - ['deleteUser']
  * @param {function} validation - ['validateId']
  */
-router.delete('/delete-user/:id', validateId, deleteUser);
+router.delete("/delete-user/:id", validateId, deleteUser);
 
 /**
  * @route GET /api/v1/user/get-user/many
@@ -379,7 +379,7 @@ router.delete('/delete-user/:id', validateId, deleteUser);
  * @param {function} controller - ['getManyUser']
  * @param {function} validation - ['validateIds']
  */
-router.get('/get-user/many', validateIds, getManyUser);
+router.get("/get-user/many", validateIds, getManyUser);
 
 /**
  * @route GET /api/v1/user/get-user/:id
@@ -389,7 +389,7 @@ router.get('/get-user/many', validateIds, getManyUser);
  * @param {function} controller - ['getUserById']
  * @param {function} validation - ['validateId']
  */
-router.get('/get-user/:id', validateId, getUserById);
+router.get("/get-user/:id", validateId, getUserById);
 
 // Export the router
 module.exports = router;
