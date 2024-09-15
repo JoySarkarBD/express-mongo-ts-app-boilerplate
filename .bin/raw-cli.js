@@ -343,8 +343,8 @@ export const getMany${capitalizedResourceName} = catchAsync(async (req: Request,
       const modelContent = `
 import mongoose, { Document, Schema } from 'mongoose';
 
-// Define an interface representing a ${capitalizedResourceName} document
-interface I${capitalizedResourceName} extends Document {
+// Define and export an interface representing a ${capitalizedResourceName} document
+export interface I${capitalizedResourceName} extends Document {
   // Define the schema fields with their types
   // Example fields (replace with actual fields)
   // fieldName: fieldType;
@@ -359,6 +359,9 @@ const ${capitalizedResourceName}Schema: Schema<I${capitalizedResourceName}> = ne
   //   required: true,
   //   trim: true,
   // },
+},{
+ timestamps: true,
+ versionKey: false,
 });
 
 // Create the ${capitalizedResourceName} model
@@ -441,91 +444,123 @@ export const validate${capitalizedResourceName} = (req: Request, res: Response, 
       // Create service content
       const serviceContent = `
 // Import the model
-import ${capitalizedResourceName}Model from '${modelExists.exists ? `../${relativePath.replace(/\\/g, '/').replace(/\.ts$/, '')}` : `./${args[0]}.model`}';
+import ${capitalizedResourceName}Model, { I${capitalizedResourceName} } from '${modelExists.exists ? `../${relativePath.replace(/\\/g, '/').replace(/\.ts$/, '')}` : `./${args[0]}.model`}';
 
 /**
  * Service function to create a new ${resourceName}.
  *
- * @param data - The data to create a new ${resourceName}.
- * @returns {Promise<${capitalizedResourceName}>} - The created ${resourceName}.
+ * @param {Partial<I${capitalizedResourceName}>} data - The data to create a new ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The created ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} creation fails.
  */
-const create${capitalizedResourceName} = async (data: object) => {
+const create${capitalizedResourceName} = async (data: Partial<I${capitalizedResourceName}>): Promise<Partial<I${capitalizedResourceName}>> => {
   const new${capitalizedResourceName} = new ${capitalizedResourceName}Model(data);
-  return await new${capitalizedResourceName}.save();
+  const saved${capitalizedResourceName} = await new${capitalizedResourceName}.save();
+  if (!saved${capitalizedResourceName}) throw new Error('Failed to create ${resourceName}');
+  return saved${capitalizedResourceName};
 };
 
 /**
  * Service function to create multiple ${resourceName}.
  *
- * @param data - An array of data to create multiple ${resourceName}.
- * @returns {Promise<${capitalizedResourceName}[]>} - The created ${resourceName}.
+ * @param {Partial<I${capitalizedResourceName}>[]} data - An array of data to create multiple ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The created ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} creation fails.
  */
-const createMany${capitalizedResourceName} = async (data: object[]) => {
-  return await ${capitalizedResourceName}Model.insertMany(data);
+const createMany${capitalizedResourceName} = async (data: Partial<I${capitalizedResourceName}>[]): Promise<Partial<I${capitalizedResourceName}>[]> => {
+  const created${capitalizedResourceName} = await ${capitalizedResourceName}Model.insertMany(data);
+  if (!created${capitalizedResourceName}) throw new Error('Failed to create multiple ${resourceName}');
+  return created${capitalizedResourceName};
 };
 
 /**
  * Service function to update a single ${resourceName} by ID.
  *
- * @param id - The ID of the ${resourceName} to update.
- * @param data - The updated data for the ${resourceName}.
- * @returns {Promise<${capitalizedResourceName}>} - The updated ${resourceName}.
+ * @param {string} id - The ID of the ${resourceName} to update.
+ * @param {Partial<I${capitalizedResourceName}>} data - The updated data for the ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The updated ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} update fails.
  */
-const update${capitalizedResourceName} = async (id: string, data: object) => {
-  return await ${capitalizedResourceName}Model.findByIdAndUpdate(id, data, { new: true });
+const update${capitalizedResourceName} = async (id: string, data: Partial<I${capitalizedResourceName}>): Promise<Partial<I${capitalizedResourceName}>> => {
+  const updated${capitalizedResourceName} = await ${capitalizedResourceName}Model.findByIdAndUpdate(id, data, { new: true });
+  if (!updated${capitalizedResourceName}) throw new Error('Failed to update ${resourceName}');
+  return updated${capitalizedResourceName};
 };
 
 /**
  * Service function to update multiple ${resourceName}.
  *
- * @param data - An array of data to update multiple ${resourceName}.
- * @returns {Promise<${capitalizedResourceName}[]>} - The updated ${resourceName}.
+ * @param {Array<{ id: string, updates: Partial<I${capitalizedResourceName}> }>} data - An array of data to update multiple ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The updated ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} update fails.
  */
-const updateMany${capitalizedResourceName} = async (data: { id: string, updates: object }[]) => {
+const updateMany${capitalizedResourceName} = async (data: Array<{ id: string, updates: Partial<I${capitalizedResourceName}> }>): Promise<Partial<I${capitalizedResourceName}>[]> => {
   const updatePromises = data.map(({ id, updates }) =>
     ${capitalizedResourceName}Model.findByIdAndUpdate(id, updates, { new: true })
   );
-  return await Promise.all(updatePromises);
+  const updated${capitalizedResourceName} = await Promise.all(updatePromises);
+  
+  // Filter out null values
+  const validUpdated${capitalizedResourceName} = updated${capitalizedResourceName}.filter(item => item !== null) as I${capitalizedResourceName}[];
+
+  if (!validUpdated${capitalizedResourceName}.length) throw new Error('Failed to update multiple ${resourceName}');
+  return validUpdated${capitalizedResourceName};
 };
 
 /**
  * Service function to delete a single ${resourceName} by ID.
  *
- * @param id - The ID of the ${resourceName} to delete.
- * @returns {Promise<${capitalizedResourceName}>} - The deleted ${resourceName}.
+ * @param {string} id - The ID of the ${resourceName} to delete.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The deleted ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
  */
-const delete${capitalizedResourceName} = async (id: string) => {
-  return await ${capitalizedResourceName}Model.findByIdAndDelete(id);
+const delete${capitalizedResourceName} = async (id: string): Promise<Partial<I${capitalizedResourceName}>> => {
+  const deleted${capitalizedResourceName} = await ${capitalizedResourceName}Model.findByIdAndDelete(id);
+  if (!deleted${capitalizedResourceName}) throw new Error('Failed to delete ${resourceName}');
+  return deleted${capitalizedResourceName};
 };
 
 /**
  * Service function to delete multiple ${resourceName}.
  *
- * @param ids - An array of IDs of ${resourceName} to delete.
- * @returns {Promise<${capitalizedResourceName}[]>} - The deleted ${resourceName}.
+ * @param {string[]} ids - An array of IDs of ${resourceName} to delete.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The deleted ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
  */
-const deleteMany${capitalizedResourceName} = async (ids: string[]) => {
-  return await ${capitalizedResourceName}Model.deleteMany({ _id: { $in: ids } });
+const deleteMany${capitalizedResourceName} = async (ids: string[]): Promise<Partial<I${capitalizedResourceName}>[]> => {
+  const ${resourceName}ToDelete = await ${capitalizedResourceName}Model.find({ _id: { $in: ids } });
+  if (!${resourceName}ToDelete.length) throw new Error('No ${resourceName} found to delete');
+
+  const deleteResult = await ${capitalizedResourceName}Model.deleteMany({ _id: { $in: ids } });
+  if (deleteResult.deletedCount === 0) throw new Error('Failed to delete multiple ${resourceName}');
+  
+  return ${resourceName}ToDelete;  // Return the documents that were deleted
 };
 
 /**
  * Service function to retrieve a single ${resourceName} by ID.
  *
- * @param id - The ID of the ${resourceName} to retrieve.
- * @returns {Promise<${capitalizedResourceName}>} - The retrieved ${resourceName}.
+ * @param {string} id - The ID of the ${resourceName} to retrieve.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The retrieved ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
  */
-const get${capitalizedResourceName}ById = async (id: string) => {
-  return await ${capitalizedResourceName}Model.findById(id);
+const get${capitalizedResourceName}ById = async (id: string): Promise<Partial<I${capitalizedResourceName}>> => {
+  const ${resourceName} = await ${capitalizedResourceName}Model.findById(id);
+  if (!${resourceName}) throw new Error('${resourceName} not found');
+  return ${resourceName};
 };
 
 /**
  * Service function to retrieve multiple ${resourceName} based on query parameters.
  *
- * @param query - The query parameters for filtering ${resourceName}.
- * @returns {Promise<${capitalizedResourceName}[]>} - The retrieved ${resourceName}.
+ * @param {object} query - The query parameters for filtering ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The retrieved ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
  */
-const getMany${capitalizedResourceName} = async (query: object) => {
-  return await ${capitalizedResourceName}Model.find(query);
+const getMany${capitalizedResourceName} = async (query: object): Promise<Partial<I${capitalizedResourceName}>[]> => {
+  const ${resourceName} = await ${capitalizedResourceName}Model.find(query);
+  if (!${resourceName}) throw new Error('Failed to retrieve ${resourceName}');
+  return ${resourceName};
 };
 
 export const ${resourceName}Services = {
@@ -538,7 +573,6 @@ export const ${resourceName}Services = {
   get${capitalizedResourceName}ById,
   getMany${capitalizedResourceName},
 };
-
     `;
 
       // Path to the service file
@@ -891,12 +925,24 @@ export const getMany${capitalizedResourceName} = catchAsync(async (req: Request,
       const modelContent = `
 import mongoose, { Document, Schema } from 'mongoose';
 
-interface I${capitalizedResourceName} extends Document {
+// Define and export an interface representing a ${capitalizedResourceName} document
+export interface I${capitalizedResourceName} extends Document {
   // Define the schema fields with their types
+  // Example fields (replace with actual fields)
+  // fieldName: fieldType;
 }
 
 const ${capitalizedResourceName}Schema: Schema<I${capitalizedResourceName}> = new Schema({
   // Define schema fields here
+  // Example fields (replace with actual schema)
+  // fieldName: {
+  //   type: Schema.Types.FieldType,
+  //   required: true,
+  //   trim: true,
+  // },
+},{
+ timestamps: true,
+ versionKey: false,
 });
 
 const ${capitalizedResourceName} = mongoose.model<I${capitalizedResourceName}>('${capitalizedResourceName}', ${capitalizedResourceName}Schema);
@@ -966,99 +1012,132 @@ export const validate${capitalizedResourceName} = (req: Request, res: Response, 
       // Create service content
       const serviceContent = `
 // Import the model
-import ${capitalizedResourceName}Model from '${
+import ${capitalizedResourceName}Model, { I${capitalizedResourceName} } from '${
         modelExists.exists
           ? `${Array(nestedFolders.length + 1)
               .fill('..')
               .join('/')}/${resourceName}/${resourceName}.model`
           : `./${resourceName}.model`
       }';
+
 /**
  * Service function to create a new ${resourceName}.
  *
- * @param data - The data to create a new ${resourceName}.
- * @returns {Promise<${capitalizedResourceName}>} - The created ${resourceName}.
+ * @param {Partial<I${capitalizedResourceName}>} data - The data to create a new ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The created ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} creation fails.
  */
-const create${capitalizedResourceName} = async (data: object) => {
+const create${capitalizedResourceName} = async (data: Partial<I${capitalizedResourceName}>): Promise<Partial<I${capitalizedResourceName}>> => {
   const new${capitalizedResourceName} = new ${capitalizedResourceName}Model(data);
-  return await new${capitalizedResourceName}.save();
+  const saved${capitalizedResourceName} = await new${capitalizedResourceName}.save();
+  if (!saved${capitalizedResourceName}) throw new Error('Failed to create ${resourceName}');
+  return saved${capitalizedResourceName};
 };
 
 /**
- * Service function to create multiple ${resourceName}s.
+ * Service function to create multiple ${resourceName}.
  *
- * @param data - An array of data to create multiple ${resourceName}.
- * @returns {Promise<${capitalizedResourceName}[]>} - The created ${resourceName}.
+ * @param {Partial<I${capitalizedResourceName}>[]} data - An array of data to create multiple ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The created ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} creation fails.
  */
-const createMany${capitalizedResourceName} = async (data: object[]) => {
-  return await ${capitalizedResourceName}Model.insertMany(data);
+const createMany${capitalizedResourceName} = async (data: Partial<I${capitalizedResourceName}>[]): Promise<Partial<I${capitalizedResourceName}>[]> => {
+  const created${capitalizedResourceName} = await ${capitalizedResourceName}Model.insertMany(data);
+  if (!created${capitalizedResourceName}) throw new Error('Failed to create multiple ${resourceName}');
+  return created${capitalizedResourceName};
 };
 
 /**
  * Service function to update a single ${resourceName} by ID.
  *
- * @param id - The ID of the ${resourceName} to update.
- * @param data - The updated data for the ${resourceName}.
- * @returns {Promise<${capitalizedResourceName}>} - The updated ${resourceName}.
+ * @param {string} id - The ID of the ${resourceName} to update.
+ * @param {Partial<I${capitalizedResourceName}>} data - The updated data for the ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The updated ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} update fails.
  */
-const update${capitalizedResourceName} = async (id: string, data: object) => {
-  return await ${capitalizedResourceName}Model.findByIdAndUpdate(id, data, { new: true });
+const update${capitalizedResourceName} = async (id: string, data: Partial<I${capitalizedResourceName}>): Promise<Partial<I${capitalizedResourceName}>> => {
+  const updated${capitalizedResourceName} = await ${capitalizedResourceName}Model.findByIdAndUpdate(id, data, { new: true });
+  if (!updated${capitalizedResourceName}) throw new Error('Failed to update ${resourceName}');
+  return updated${capitalizedResourceName};
 };
 
 /**
  * Service function to update multiple ${resourceName}.
  *
- * @param data - An array of data to update multiple ${resourceName}.
- * @returns {Promise<${capitalizedResourceName}[]>} - The updated ${resourceName}.
+ * @param {Array<{ id: string, updates: Partial<I${capitalizedResourceName}> }>} data - An array of data to update multiple ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The updated ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} update fails.
  */
-const updateMany${capitalizedResourceName} = async (data: { id: string, updates: object }[]) => {
+const updateMany${capitalizedResourceName} = async (data: Array<{ id: string, updates: Partial<I${capitalizedResourceName}> }>): Promise<Partial<I${capitalizedResourceName}>[]> => {
   const updatePromises = data.map(({ id, updates }) =>
     ${capitalizedResourceName}Model.findByIdAndUpdate(id, updates, { new: true })
   );
-  return await Promise.all(updatePromises);
+  const updated${capitalizedResourceName} = await Promise.all(updatePromises);
+  
+  // Filter out null values
+  const validUpdated${capitalizedResourceName} = updated${capitalizedResourceName}.filter(item => item !== null) as I${capitalizedResourceName}[];
+
+  if (!validUpdated${capitalizedResourceName}.length) throw new Error('Failed to update multiple ${resourceName}');
+  return validUpdated${capitalizedResourceName};
 };
 
 /**
  * Service function to delete a single ${resourceName} by ID.
  *
- * @param id - The ID of the ${resourceName} to delete.
- * @returns {Promise<${capitalizedResourceName}>} - The deleted ${resourceName}.
+ * @param {string} id - The ID of the ${resourceName} to delete.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The deleted ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
  */
-const delete${capitalizedResourceName} = async (id: string) => {
-  return await ${capitalizedResourceName}Model.findByIdAndDelete(id);
+const delete${capitalizedResourceName} = async (id: string): Promise<Partial<I${capitalizedResourceName}>> => {
+  const deleted${capitalizedResourceName} = await ${capitalizedResourceName}Model.findByIdAndDelete(id);
+  if (!deleted${capitalizedResourceName}) throw new Error('Failed to delete ${resourceName}');
+  return deleted${capitalizedResourceName};
 };
 
 /**
  * Service function to delete multiple ${resourceName}.
  *
- * @param ids - An array of IDs of ${resourceName} to delete.
- * @returns {Promise<${capitalizedResourceName}[]>} - The deleted ${resourceName}.
+ * @param {string[]} ids - An array of IDs of ${resourceName} to delete.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The deleted ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
  */
-const deleteMany${capitalizedResourceName} = async (ids: string[]) => {
-  return await ${capitalizedResourceName}Model.deleteMany({ _id: { $in: ids } });
+const deleteMany${capitalizedResourceName} = async (ids: string[]): Promise<Partial<I${capitalizedResourceName}>[]> => {
+  const ${resourceName}ToDelete = await ${capitalizedResourceName}Model.find({ _id: { $in: ids } });
+  if (!${resourceName}ToDelete.length) throw new Error('No ${resourceName} found to delete');
+
+  const deleteResult = await ${capitalizedResourceName}Model.deleteMany({ _id: { $in: ids } });
+  if (deleteResult.deletedCount === 0) throw new Error('Failed to delete multiple ${resourceName}');
+  
+  return ${resourceName}ToDelete;  // Return the documents that were deleted
 };
 
 /**
  * Service function to retrieve a single ${resourceName} by ID.
  *
- * @param id - The ID of the ${resourceName} to retrieve.
- * @returns {Promise<${capitalizedResourceName}>} - The retrieved ${resourceName}.
+ * @param {string} id - The ID of the ${resourceName} to retrieve.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The retrieved ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
  */
-const get${capitalizedResourceName}ById = async (id: string) => {
-  return await ${capitalizedResourceName}Model.findById(id);
+const get${capitalizedResourceName}ById = async (id: string): Promise<Partial<I${capitalizedResourceName}>> => {
+  const ${resourceName} = await ${capitalizedResourceName}Model.findById(id);
+  if (!${resourceName}) throw new Error('${resourceName} not found');
+  return ${resourceName};
 };
 
 /**
  * Service function to retrieve multiple ${resourceName} based on query parameters.
  *
- * @param query - The query parameters for filtering ${resourceName}.
- * @returns {Promise<${capitalizedResourceName}[]>} - The retrieved ${resourceName}.
+ * @param {object} query - The query parameters for filtering ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The retrieved ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
  */
-const getMany${capitalizedResourceName} = async (query: object) => {
-  return await ${capitalizedResourceName}Model.find(query);
+const getMany${capitalizedResourceName} = async (query: object): Promise<Partial<I${capitalizedResourceName}>[]> => {
+  const ${resourceName} = await ${capitalizedResourceName}Model.find(query);
+  if (!${resourceName}) throw new Error('Failed to retrieve ${resourceName}');
+  return ${resourceName};
 };
 
-export const ${resourceCamelCaseName}Services = {
+export const ${resourceName}Services = {
   create${capitalizedResourceName},
   createMany${capitalizedResourceName},
   update${capitalizedResourceName},
@@ -1068,7 +1147,6 @@ export const ${resourceCamelCaseName}Services = {
   get${capitalizedResourceName}ById,
   getMany${capitalizedResourceName},
 };
-
     `;
 
       // Path to the service file

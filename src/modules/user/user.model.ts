@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-// Define an interface representing a User document
-interface IUser extends Document {
+// Define and export an interface representing a User document
+export interface IUser extends Document {
   // Define the schema fields with their types
   // Example fields (replace with actual fields)
   // fieldName: fieldType;
@@ -16,6 +16,9 @@ const UserSchema: Schema<IUser> = new Schema({
   //   required: true,
   //   trim: true,
   // },
+},{
+ timestamps: true,
+ versionKey: false,
 });
 
 // Create the User model

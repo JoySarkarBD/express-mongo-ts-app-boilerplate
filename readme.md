@@ -266,23 +266,29 @@ export interface TUser {
 ```typescript
 import mongoose, { Document, Schema } from 'mongoose';
 
-// Define an interface representing a User document
-interface IUser extends Document {
+// Define and export an interface representing a User document
+export interface IUser extends Document {
   // Define the schema fields with their types
   // Example fields (replace with actual fields)
   // fieldName: fieldType;
 }
 
 // Define the User schema
-const UserSchema: Schema<IUser> = new Schema({
-  // Define schema fields here
-  // Example fields (replace with actual schema)
-  // fieldName: {
-  //   type: Schema.Types.FieldType,
-  //   required: true,
-  //   trim: true,
-  // },
-});
+const UserSchema: Schema<IUser> = new Schema(
+  {
+    // Define schema fields here
+    // Example fields (replace with actual schema)
+    // fieldName: {
+    //   type: Schema.Types.FieldType,
+    //   required: true,
+    //   trim: true,
+    // },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
 
 // Create the User model
 const User = mongoose.model<IUser>('User', UserSchema);
@@ -298,7 +304,7 @@ export default User;
 import { Router } from 'express';
 
 // Import controller from corresponding module
-import { 
+import {
   createUser,
   createManyUser,
   updateUser,
@@ -306,7 +312,7 @@ import {
   deleteUser,
   deleteManyUser,
   getUserById,
-  getManyUser
+  getManyUser,
 } from './user.controller';
 
 //Import validation from corresponding module
@@ -324,7 +330,7 @@ const router = Router();
  * @param {function} controller - ['createUser']
  * @param {function} validation - ['validateUser']
  */
-router.post("/create-user", validateUser, createUser);
+router.post('/create-user', validateUser, createUser);
 
 /**
  * @route POST /api/v1/user/create-user/many
@@ -332,7 +338,7 @@ router.post("/create-user", validateUser, createUser);
  * @access Public
  * @param {function} controller - ['createManyUser']
  */
-router.post("/create-user/many", createManyUser);
+router.post('/create-user/many', createManyUser);
 
 /**
  * @route PUT /api/v1/user/update-user/many
@@ -341,7 +347,7 @@ router.post("/create-user/many", createManyUser);
  * @param {function} controller - ['updateManyUser']
  * @param {function} validation - ['validateIds']
  */
-router.put("/update-user/many", validateIds, updateManyUser);
+router.put('/update-user/many', validateIds, updateManyUser);
 
 /**
  * @route PUT /api/v1/user/update-user/:id
@@ -351,7 +357,7 @@ router.put("/update-user/many", validateIds, updateManyUser);
  * @param {function} controller - ['updateUser']
  * @param {function} validation - ['validateId', 'validateUser']
  */
-router.put("/update-user/:id", validateId, validateUser, updateUser);
+router.put('/update-user/:id', validateId, validateUser, updateUser);
 
 /**
  * @route DELETE /api/v1/user/delete-user/many
@@ -360,7 +366,7 @@ router.put("/update-user/:id", validateId, validateUser, updateUser);
  * @param {function} controller - ['deleteManyUser']
  * @param {function} validation - ['validateIds']
  */
-router.delete("/delete-user/many", validateIds, deleteManyUser);
+router.delete('/delete-user/many', validateIds, deleteManyUser);
 
 /**
  * @route DELETE /api/v1/user/delete-user/:id
@@ -370,7 +376,7 @@ router.delete("/delete-user/many", validateIds, deleteManyUser);
  * @param {function} controller - ['deleteUser']
  * @param {function} validation - ['validateId']
  */
-router.delete("/delete-user/:id", validateId, deleteUser);
+router.delete('/delete-user/:id', validateId, deleteUser);
 
 /**
  * @route GET /api/v1/user/get-user/many
@@ -379,7 +385,7 @@ router.delete("/delete-user/:id", validateId, deleteUser);
  * @param {function} controller - ['getManyUser']
  * @param {function} validation - ['validateIds']
  */
-router.get("/get-user/many", validateIds, getManyUser);
+router.get('/get-user/many', validateIds, getManyUser);
 
 /**
  * @route GET /api/v1/user/get-user/:id
@@ -389,7 +395,7 @@ router.get("/get-user/many", validateIds, getManyUser);
  * @param {function} controller - ['getUserById']
  * @param {function} validation - ['validateId']
  */
-router.get("/get-user/:id", validateId, getUserById);
+router.get('/get-user/:id', validateId, getUserById);
 
 // Export the router
 module.exports = router;
@@ -399,91 +405,125 @@ module.exports = router;
 
 ```typescript
 // Import the model
-import UserModel from './user.model';
+import UserModel, { IUser } from './user.model';
 
 /**
  * Service function to create a new user.
  *
- * @param data - The data to create a new user.
- * @returns {Promise<User>} - The created user.
+ * @param {Partial<IUser>} data - The data to create a new user.
+ * @returns {Promise<Partial<IUser>>} - The created user.
+ * @throws {Error} - Throws an error if the user creation fails.
  */
-const createUser = async (data: object) => {
+const createUser = async (data: Partial<IUser>): Promise<Partial<IUser>> => {
   const newUser = new UserModel(data);
-  return await newUser.save();
+  const savedUser = await newUser.save();
+  if (!savedUser) throw new Error('Failed to create user');
+  return savedUser;
 };
 
 /**
  * Service function to create multiple user.
  *
- * @param data - An array of data to create multiple user.
- * @returns {Promise<User[]>} - The created user.
+ * @param {Partial<IUser>[]} data - An array of data to create multiple user.
+ * @returns {Promise<Partial<IUser>[]>} - The created user.
+ * @throws {Error} - Throws an error if the user creation fails.
  */
-const createManyUser = async (data: object[]) => {
-  return await UserModel.insertMany(data);
+const createManyUser = async (data: Partial<IUser>[]): Promise<Partial<IUser>[]> => {
+  const createdUser = await UserModel.insertMany(data);
+  if (!createdUser) throw new Error('Failed to create multiple user');
+  return createdUser;
 };
 
 /**
  * Service function to update a single user by ID.
  *
- * @param id - The ID of the user to update.
- * @param data - The updated data for the user.
- * @returns {Promise<User>} - The updated user.
+ * @param {string} id - The ID of the user to update.
+ * @param {Partial<IUser>} data - The updated data for the user.
+ * @returns {Promise<Partial<IUser>>} - The updated user.
+ * @throws {Error} - Throws an error if the user update fails.
  */
-const updateUser = async (id: string, data: object) => {
-  return await UserModel.findByIdAndUpdate(id, data, { new: true });
+const updateUser = async (id: string, data: Partial<IUser>): Promise<Partial<IUser>> => {
+  const updatedUser = await UserModel.findByIdAndUpdate(id, data, { new: true });
+  if (!updatedUser) throw new Error('Failed to update user');
+  return updatedUser;
 };
 
 /**
  * Service function to update multiple user.
  *
- * @param data - An array of data to update multiple user.
- * @returns {Promise<User[]>} - The updated user.
+ * @param {Array<{ id: string, updates: Partial<IUser> }>} data - An array of data to update multiple user.
+ * @returns {Promise<Partial<IUser>[]>} - The updated user.
+ * @throws {Error} - Throws an error if the user update fails.
  */
-const updateManyUser = async (data: { id: string; updates: object }[]) => {
+const updateManyUser = async (
+  data: Array<{ id: string; updates: Partial<IUser> }>
+): Promise<Partial<IUser>[]> => {
   const updatePromises = data.map(({ id, updates }) =>
     UserModel.findByIdAndUpdate(id, updates, { new: true })
   );
-  return await Promise.all(updatePromises);
+  const updatedUser = await Promise.all(updatePromises);
+
+  // Filter out null values
+  const validUpdatedUser = updatedUser.filter((item) => item !== null) as IUser[];
+
+  if (!validUpdatedUser.length) throw new Error('Failed to update multiple user');
+  return validUpdatedUser;
 };
 
 /**
  * Service function to delete a single user by ID.
  *
- * @param id - The ID of the user to delete.
- * @returns {Promise<User>} - The deleted user.
+ * @param {string} id - The ID of the user to delete.
+ * @returns {Promise<Partial<IUser>>} - The deleted user.
+ * @throws {Error} - Throws an error if the user deletion fails.
  */
-const deleteUser = async (id: string) => {
-  return await UserModel.findByIdAndDelete(id);
+const deleteUser = async (id: string): Promise<Partial<IUser>> => {
+  const deletedUser = await UserModel.findByIdAndDelete(id);
+  if (!deletedUser) throw new Error('Failed to delete user');
+  return deletedUser;
 };
 
 /**
  * Service function to delete multiple user.
  *
- * @param ids - An array of IDs of user to delete.
- * @returns {Promise<User[]>} - The deleted user.
+ * @param {string[]} ids - An array of IDs of user to delete.
+ * @returns {Promise<Partial<IUser>[]>} - The deleted user.
+ * @throws {Error} - Throws an error if the user deletion fails.
  */
-const deleteManyUser = async (ids: string[]) => {
-  return await UserModel.deleteMany({ _id: { $in: ids } });
+const deleteManyUser = async (ids: string[]): Promise<Partial<IUser>[]> => {
+  const userToDelete = await UserModel.find({ _id: { $in: ids } });
+  if (!userToDelete.length) throw new Error('No user found to delete');
+
+  const deleteResult = await UserModel.deleteMany({ _id: { $in: ids } });
+  if (deleteResult.deletedCount === 0) throw new Error('Failed to delete multiple user');
+
+  return userToDelete; // Return the documents that were deleted
 };
 
 /**
  * Service function to retrieve a single user by ID.
  *
- * @param id - The ID of the user to retrieve.
- * @returns {Promise<User>} - The retrieved user.
+ * @param {string} id - The ID of the user to retrieve.
+ * @returns {Promise<Partial<IUser>>} - The retrieved user.
+ * @throws {Error} - Throws an error if the user retrieval fails.
  */
-const getUserById = async (id: string) => {
-  return await UserModel.findById(id);
+const getUserById = async (id: string): Promise<Partial<IUser>> => {
+  const user = await UserModel.findById(id);
+  if (!user) throw new Error('user not found');
+  return user;
 };
 
 /**
  * Service function to retrieve multiple user based on query parameters.
  *
- * @param query - The query parameters for filtering user.
- * @returns {Promise<User[]>} - The retrieved user.
+ * @param {object} query - The query parameters for filtering user.
+ * @returns {Promise<Partial<IUser>[]>} - The retrieved user.
+ * @throws {Error} - Throws an error if the user retrieval fails.
  */
-const getManyUser = async (query: object) => {
-  return await UserModel.find(query);
+const getManyUser = async (query: object): Promise<Partial<IUser>[]> => {
+  const user = await UserModel.find(query);
+  if (!user) throw new Error('Failed to retrieve user');
+  return user;
 };
 
 export const userServices = {
