@@ -38,7 +38,7 @@ async function main() {
     // Connect to the database
     await mongoose.connect(config.DB_CONNECTION_URI);
     console.log(`${GREEN}[Express] ${BLUE}[Database] ${RESET}Database connected successfully
-      `);
+`);
 
     // Log routes in any mode except production
     if (config.NODE_ENV !== 'production') {
