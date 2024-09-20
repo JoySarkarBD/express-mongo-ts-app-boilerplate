@@ -37,21 +37,52 @@ async function main() {
 
     // Connect to the database
     await mongoose.connect(config.DB_CONNECTION_URI);
-    console.log(`${GREEN}[Express] ${BLUE}[Database] ${RESET}Database connected successfully`);
+    console.log(`${GREEN}[Express] ${BLUE}[Database] ${RESET}Database connected successfully
+      `);
 
     // Log routes in development mode
     if (config.NODE_ENV === 'development') {
-      routes.forEach((route) => {
-        const routeInfo = `${GREEN}${route.method} ${route.path} - ${YELLOW}${route.time.toFixed(2)} ms${RESET}`;
-        console.log(
-          `${GREEN}[Express] ${WHITE}${getFormattedDate()} ${getFormattedTime()} ${GREEN}LOG ${YELLOW}[RouterExplorer] ${routeInfo}`
-        );
-      });
+      logRoutesByModule();
     }
   } catch (error) {
     console.error(`${GREEN}[Express] ${BLUE}[Error] ${RESET}Error during server startup:`, error);
     process.exit(1); // Exit process if initialization fails
   }
+}
+
+// Log routes by module with custom formatting
+function logRoutesByModule() {
+  const groupedRoutes: { [module: string]: any[] } = {};
+
+  // Group routes by module
+  routes.forEach((route) => {
+    if (!groupedRoutes[route.module]) {
+      groupedRoutes[route.module] = [];
+    }
+    groupedRoutes[route.module].push(route);
+  });
+
+  // Print grouped routes
+  Object.keys(groupedRoutes).forEach((module) => {
+    console.log(
+      `${YELLOW}/======================= Start: ${module.toUpperCase()} ======================/${RESET}
+      `
+    );
+
+    groupedRoutes[module].forEach((route) => {
+      const routeInfo = `${GREEN}${route.method} ${route.path} - ${YELLOW}${route.time.toFixed(2)} ms${RESET}`;
+      console.log(
+        `${GREEN}[Express] ${WHITE}${getFormattedDate()} ${getFormattedTime()} ${GREEN}LOG ${YELLOW}[RouterExplorer] ${routeInfo}`
+      );
+    });
+
+    console.log(
+      `
+${YELLOW}/======================== End: ${module.toUpperCase()} =======================/${RESET}
+      
+      `
+    );
+  });
 }
 
 // Run the main function
