@@ -40,8 +40,8 @@ async function main() {
     console.log(`${GREEN}[Express] ${BLUE}[Database] ${RESET}Database connected successfully
       `);
 
-    // Log routes in development mode
-    if (config.NODE_ENV === 'development') {
+    // Log routes in any mode except production
+    if (config.NODE_ENV !== 'production') {
       logRoutesByModule();
     }
   } catch (error) {
