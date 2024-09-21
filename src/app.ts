@@ -41,7 +41,7 @@ app.use(morgan('combined', { stream: loggerStream }));
 // Request Rate Limiting
 const limiter = rateLimit({
   windowMs: config.REQUEST_LIMIT_TIME,
-  max: process.env.NODE_ENV !== 'production' ? Infinity : config.REQUEST_LIMIT_NUMBER, // unlimited in any mode except production
+  max: config.NODE_ENV !== 'production' ? Infinity : config.REQUEST_LIMIT_NUMBER, // unlimited in any mode except production
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
@@ -60,6 +60,9 @@ const loadRoutes = (basePath: string, baseRoute: string) => {
       const itemPath = path.join(basePath, item);
       const routePrefix = `${baseRoute}/${item.replace('.route', '')}`;
 
+      // Measure the loading time of each route
+      const start = performance.now();
+
       if (fs.statSync(itemPath).isDirectory()) {
         // Recursively load routes for nested folders
         loadRoutes(itemPath, routePrefix);
@@ -67,32 +70,32 @@ const loadRoutes = (basePath: string, baseRoute: string) => {
         // Dynamically load the route file
         app.use(baseRoute, require(itemPath));
 
-        // Measure the loading time of each route
-        const start = performance.now();
-
         // Dynamically load the route file
         const routeModule = require(itemPath);
 
-        const end = performance.now();
-        const loadTime = end - start;
+        // Log routes in any mode except production
+        if (config.NODE_ENV !== 'production') {
+          const end = performance.now();
+          const loadTime = end - start;
 
-        if (routeModule) {
-          // Capture route paths and methods
-          routeModule.stack.forEach((layer: any) => {
-            if (layer.route) {
-              const methods = Object.keys(layer.route.methods).map((method) =>
-                method.toUpperCase()
-              );
-              methods.forEach((method) => {
-                routes.push({
-                  module: item.split('.')[0],
-                  path: `${baseRoute}${layer.route.path}`,
-                  method,
-                  time: loadTime,
+          if (routeModule) {
+            // Capture route paths and methods
+            routeModule.stack.forEach((layer: any) => {
+              if (layer.route) {
+                const methods = Object.keys(layer.route.methods).map((method) =>
+                  method.toUpperCase()
+                );
+                methods.forEach((method) => {
+                  routes.push({
+                    module: item.split('.')[0],
+                    path: `${baseRoute}${layer.route.path}`,
+                    method,
+                    time: loadTime,
+                  });
                 });
-              });
-            }
-          });
+              }
+            });
+          }
         }
       }
     });
