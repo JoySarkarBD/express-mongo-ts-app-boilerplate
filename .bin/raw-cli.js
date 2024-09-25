@@ -44,41 +44,27 @@ if (command === 'resource') {
         ? args[0].toLowerCase()
         : toCamelCase(args[0]);
 
-      const modelFileName = `${args[0]}.model.ts`;
+      const capitalizedResourceName = capitalize(resourceName);
 
-      function checkModelFile(args) {
+      (function () {
+        const moduleName = args[0];
+
         function searchFile(dir) {
           const files = fs.readdirSync(dir);
 
           for (const file of files) {
-            const filePath = path.join(dir, file);
-            const stat = fs.statSync(filePath);
-
-            if (stat.isDirectory()) {
-              const found = searchFile(filePath);
-              if (found) return found;
-            } else if (file === modelFileName) {
-              return filePath;
+            if (file === moduleName) {
+              console.log(`${GREEN}${capitalizedResourceName} ${RESET}module already exists.`);
+              process.exit(0);
             }
           }
 
-          return null;
+          return false;
         }
 
-        const srcPath = path.join(process.cwd(), 'src');
+        const srcPath = path.join(process.cwd(), 'src', 'modules');
         const foundPath = searchFile(srcPath);
-
-        if (foundPath) {
-          return { exists: true, filePath: foundPath };
-        } else {
-          return { exists: false, filePath: null };
-        }
-      }
-
-      // Model exist or not checking
-      const modelExists = checkModelFile(process.argv.slice(2));
-
-      const capitalizedResourceName = capitalize(resourceName);
+      })();
 
       // Path to the route directory
       const routeDir = path.join(__dirname, '..', 'src', 'modules', args[0]);
@@ -223,11 +209,13 @@ import catchAsync from '../../utils/catch-async/catch-async';
  *
  * @param {Request} req - The request object containing ${args[0]} data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The created ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} creation fails.
  */
 export const create${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create a new ${args[0]} and get the result
   const result = await ${resourceName}Services.create${capitalizedResourceName}(req.body);
+  if (!result) throw new Error('Failed to create ${resourceName}');
   // Send a success response with the created resource data
   ServerResponse(res, true, 201, '${capitalizedResourceName} created successfully', result);
 });
@@ -237,13 +225,15 @@ export const create${capitalizedResourceName} = catchAsync(async (req: Request, 
  *
  * @param {Request} req - The request object containing an array of ${args[0]} data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The created ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} creation fails.
  */
 export const createMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create multiple ${resourceName}s and get the result
   const result = await ${resourceName}Services.createMany${capitalizedResourceName}(req.body);
+  if (!result) throw new Error('Failed to create multiple ${resourceName}');
   // Send a success response with the created resources data
-  ServerResponse(res, true, 201, 'Resources created successfully', result);
+  ServerResponse(res, true, 201, '${capitalizedResourceName}s created successfully', result);
 });
 
 /**
@@ -251,12 +241,14 @@ export const createMany${capitalizedResourceName} = catchAsync(async (req: Reque
  *
  * @param {Request} req - The request object containing the ID of the ${args[0]} to update in URL parameters and the updated data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The updated ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} update fails.
  */
 export const update${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to update the ${args[0]} by ID and get the result
   const result = await ${resourceName}Services.update${capitalizedResourceName}(id, req.body);
+  if (!result) throw new Error('Failed to update ${resourceName}');
   // Send a success response with the updated resource data
   ServerResponse(res, true, 200, '${capitalizedResourceName} updated successfully', result);
 });
@@ -266,13 +258,15 @@ export const update${capitalizedResourceName} = catchAsync(async (req: Request, 
  *
  * @param {Request} req - The request object containing an array of ${args[0]} data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The updated ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} update fails.
  */
 export const updateMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to update multiple ${args[0]} and get the result
   const result = await ${resourceName}Services.updateMany${capitalizedResourceName}(req.body);
+  if (!result.length) throw new Error('Failed to update multiple ${resourceName}');
   // Send a success response with the updated resources data
-  ServerResponse(res, true, 200, 'Resources updated successfully', result);
+  ServerResponse(res, true, 200, '${capitalizedResourceName}s updated successfully', result);
 });
 
 /**
@@ -280,12 +274,14 @@ export const updateMany${capitalizedResourceName} = catchAsync(async (req: Reque
  *
  * @param {Request} req - The request object containing the ID of the ${args[0]} to delete in URL parameters.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The deleted ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
  */
 export const delete${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to delete the ${args[0]} by ID
-  await ${resourceName}Services.delete${capitalizedResourceName}(id);
+  const result = await ${resourceName}Services.delete${capitalizedResourceName}(id);
+  if (!result) throw new Error('Failed to delete ${resourceName}');
   // Send a success response confirming the deletion
   ServerResponse(res, true, 200, '${capitalizedResourceName} deleted successfully');
 });
@@ -295,13 +291,15 @@ export const delete${capitalizedResourceName} = catchAsync(async (req: Request, 
  *
  * @param {Request} req - The request object containing an array of IDs of ${args[0]} to delete in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The deleted ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
  */
 export const deleteMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to delete multiple ${args[0]} and get the result
-  await ${resourceName}Services.deleteMany${capitalizedResourceName}(req.body);
+  const result = await ${resourceName}Services.deleteMany${capitalizedResourceName}(req.body);
+  if (!result) throw new Error('Failed to delete multiple ${resourceName}');
   // Send a success response confirming the deletions
-  ServerResponse(res, true, 200, 'Resources deleted successfully');
+  ServerResponse(res, true, 200, '${capitalizedResourceName}s deleted successfully');
 });
 
 /**
@@ -309,12 +307,14 @@ export const deleteMany${capitalizedResourceName} = catchAsync(async (req: Reque
  *
  * @param {Request} req - The request object containing the ID of the ${args[0]} to retrieve in URL parameters.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The retrieved ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
  */
 export const get${capitalizedResourceName}ById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to get the ${args[0]} by ID and get the result
   const result = await ${resourceName}Services.get${capitalizedResourceName}ById(id);
+  if (!result) throw new Error('${resourceName} not found');
   // Send a success response with the retrieved resource data
   ServerResponse(res, true, 200, '${capitalizedResourceName} retrieved successfully', result);
 });
@@ -324,13 +324,15 @@ export const get${capitalizedResourceName}ById = catchAsync(async (req: Request,
  *
  * @param {Request} req - The request object containing query parameters for filtering.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The retrieved ${resourceName}.
+ * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
  */
 export const getMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to get multiple ${args[0]} based on query parameters and get the result
   const result = await ${resourceName}Services.getMany${capitalizedResourceName}(req.query);
+  if (!result) throw new Error('Failed to retrieve ${resourceName}');
   // Send a success response with the retrieved resources data
-  ServerResponse(res, true, 200, 'Resources retrieved successfully', result);
+  ServerResponse(res, true, 200, '${capitalizedResourceName}s retrieved successfully', result);
 });
     `;
 
@@ -373,11 +375,8 @@ export default ${capitalizedResourceName};
 
       // Path to the model file
       const modelFilePath = path.join(modelsDir, `${args[0]}.model.ts`);
-
-      if (!modelExists.exists) {
-        // Write content to the model file
-        fs.writeFileSync(modelFilePath, modelContent.trim());
-      }
+      // Write content to the model file
+      fs.writeFileSync(modelFilePath, modelContent.trim());
 
       // Create interface file content
       const interfaceContent = `
@@ -437,26 +436,20 @@ export const validate${capitalizedResourceName} = (req: Request, res: Response, 
       // Write content to the validation file
       fs.writeFileSync(validationFilePath, validationContent.trim());
 
-      const relativePath = modelExists?.filePath?.substring(
-        modelExists.filePath.indexOf('modules') + 'modules'.length + 1
-      );
-
       // Create service content
       const serviceContent = `
 // Import the model
-import ${capitalizedResourceName}Model, { I${capitalizedResourceName} } from '${modelExists.exists ? `../${relativePath.replace(/\\/g, '/').replace(/\.ts$/, '')}` : `./${args[0]}.model`}';
+import ${capitalizedResourceName}Model, { I${capitalizedResourceName} } from './${args[0]}.model';
 
 /**
  * Service function to create a new ${resourceName}.
  *
  * @param {Partial<I${capitalizedResourceName}>} data - The data to create a new ${resourceName}.
  * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The created ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} creation fails.
  */
 const create${capitalizedResourceName} = async (data: Partial<I${capitalizedResourceName}>): Promise<Partial<I${capitalizedResourceName}>> => {
   const new${capitalizedResourceName} = new ${capitalizedResourceName}Model(data);
   const saved${capitalizedResourceName} = await new${capitalizedResourceName}.save();
-  if (!saved${capitalizedResourceName}) throw new Error('Failed to create ${resourceName}');
   return saved${capitalizedResourceName};
 };
 
@@ -465,11 +458,9 @@ const create${capitalizedResourceName} = async (data: Partial<I${capitalizedReso
  *
  * @param {Partial<I${capitalizedResourceName}>[]} data - An array of data to create multiple ${resourceName}.
  * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The created ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} creation fails.
  */
 const createMany${capitalizedResourceName} = async (data: Partial<I${capitalizedResourceName}>[]): Promise<Partial<I${capitalizedResourceName}>[]> => {
   const created${capitalizedResourceName} = await ${capitalizedResourceName}Model.insertMany(data);
-  if (!created${capitalizedResourceName}) throw new Error('Failed to create multiple ${resourceName}');
   return created${capitalizedResourceName};
 };
 
@@ -479,11 +470,9 @@ const createMany${capitalizedResourceName} = async (data: Partial<I${capitalized
  * @param {string} id - The ID of the ${resourceName} to update.
  * @param {Partial<I${capitalizedResourceName}>} data - The updated data for the ${resourceName}.
  * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The updated ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} update fails.
  */
-const update${capitalizedResourceName} = async (id: string, data: Partial<I${capitalizedResourceName}>): Promise<Partial<I${capitalizedResourceName}>> => {
+const update${capitalizedResourceName} = async (id: string, data: Partial<I${capitalizedResourceName}>): Promise<Partial<I${capitalizedResourceName} | null>> => {
   const updated${capitalizedResourceName} = await ${capitalizedResourceName}Model.findByIdAndUpdate(id, data, { new: true });
-  if (!updated${capitalizedResourceName}) throw new Error('Failed to update ${resourceName}');
   return updated${capitalizedResourceName};
 };
 
@@ -492,18 +481,14 @@ const update${capitalizedResourceName} = async (id: string, data: Partial<I${cap
  *
  * @param {Array<{ id: string, updates: Partial<I${capitalizedResourceName}> }>} data - An array of data to update multiple ${resourceName}.
  * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The updated ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} update fails.
  */
 const updateMany${capitalizedResourceName} = async (data: Array<{ id: string, updates: Partial<I${capitalizedResourceName}> }>): Promise<Partial<I${capitalizedResourceName}>[]> => {
   const updatePromises = data.map(({ id, updates }) =>
     ${capitalizedResourceName}Model.findByIdAndUpdate(id, updates, { new: true })
   );
   const updated${capitalizedResourceName} = await Promise.all(updatePromises);
-  
   // Filter out null values
   const validUpdated${capitalizedResourceName} = updated${capitalizedResourceName}.filter(item => item !== null) as I${capitalizedResourceName}[];
-
-  if (!validUpdated${capitalizedResourceName}.length) throw new Error('Failed to update multiple ${resourceName}');
   return validUpdated${capitalizedResourceName};
 };
 
@@ -512,11 +497,9 @@ const updateMany${capitalizedResourceName} = async (data: Array<{ id: string, up
  *
  * @param {string} id - The ID of the ${resourceName} to delete.
  * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The deleted ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
  */
-const delete${capitalizedResourceName} = async (id: string): Promise<Partial<I${capitalizedResourceName}>> => {
+const delete${capitalizedResourceName} = async (id: string): Promise<Partial<I${capitalizedResourceName} | null>> => {
   const deleted${capitalizedResourceName} = await ${capitalizedResourceName}Model.findByIdAndDelete(id);
-  if (!deleted${capitalizedResourceName}) throw new Error('Failed to delete ${resourceName}');
   return deleted${capitalizedResourceName};
 };
 
@@ -525,16 +508,12 @@ const delete${capitalizedResourceName} = async (id: string): Promise<Partial<I${
  *
  * @param {string[]} ids - An array of IDs of ${resourceName} to delete.
  * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The deleted ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
  */
 const deleteMany${capitalizedResourceName} = async (ids: string[]): Promise<Partial<I${capitalizedResourceName}>[]> => {
   const ${resourceName}ToDelete = await ${capitalizedResourceName}Model.find({ _id: { $in: ids } });
   if (!${resourceName}ToDelete.length) throw new Error('No ${resourceName} found to delete');
-
-  const deleteResult = await ${capitalizedResourceName}Model.deleteMany({ _id: { $in: ids } });
-  if (deleteResult.deletedCount === 0) throw new Error('Failed to delete multiple ${resourceName}');
-  
-  return ${resourceName}ToDelete;  // Return the documents that were deleted
+  await ${capitalizedResourceName}Model.deleteMany({ _id: { $in: ids } });
+  return ${resourceName}ToDelete; 
 };
 
 /**
@@ -542,11 +521,9 @@ const deleteMany${capitalizedResourceName} = async (ids: string[]): Promise<Part
  *
  * @param {string} id - The ID of the ${resourceName} to retrieve.
  * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The retrieved ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
  */
-const get${capitalizedResourceName}ById = async (id: string): Promise<Partial<I${capitalizedResourceName}>> => {
+const get${capitalizedResourceName}ById = async (id: string): Promise<Partial<I${capitalizedResourceName} | null>> => {
   const ${resourceName} = await ${capitalizedResourceName}Model.findById(id);
-  if (!${resourceName}) throw new Error('${resourceName} not found');
   return ${resourceName};
 };
 
@@ -555,11 +532,9 @@ const get${capitalizedResourceName}ById = async (id: string): Promise<Partial<I$
  *
  * @param {object} query - The query parameters for filtering ${resourceName}.
  * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The retrieved ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
  */
 const getMany${capitalizedResourceName} = async (query: object): Promise<Partial<I${capitalizedResourceName}>[]> => {
   const ${resourceName} = await ${capitalizedResourceName}Model.find(query);
-  if (!${resourceName}) throw new Error('Failed to retrieve ${resourceName}');
   return ${resourceName};
 };
 
@@ -591,17 +566,15 @@ export const ${resourceName}Services = {
           interfaceFilePath
         )} ${BLUE}(${Buffer.byteLength(interfaceContent, 'utf8')} bytes)`
       );
-      if (!modelExists.exists) {
-        console.log(
-          `${GREEN}CREATE ${RESET}${formatPath(
-            modelFilePath
-          )} ${BLUE}(${Buffer.byteLength(modelContent, 'utf8')} bytes)`
-        );
-      }
       console.log(
         `${GREEN}CREATE ${RESET}${formatPath(
           routeFilePath
         )} ${BLUE}(${Buffer.byteLength(routeContent, 'utf8')} bytes)`
+      );
+      console.log(
+        `${GREEN}CREATE ${RESET}${formatPath(
+          modelFilePath
+        )} ${BLUE}(${Buffer.byteLength(modelContent, 'utf8')} bytes)`
       );
       console.log(
         `${GREEN}CREATE ${RESET}${formatPath(
@@ -612,572 +585,6 @@ export const ${resourceName}Services = {
         `${GREEN}CREATE ${RESET}${formatPath(
           validationFilePath
         )} ${BLUE}(${Buffer.byteLength(validationContent, 'utf8')} bytes)`
-      );
-    });
-
-  program.parse(process.argv);
-} else if (command === 'nested-resource') {
-  program
-    .version('1.0.0')
-    .description('Generate nested route, model, controller, and interface files for a new resource')
-    .argument('<path>', 'Nested path to resource (e.g., folder1/folder2/resourceName)')
-    .action((nestedPath) => {
-      const parts = args[0].split('/');
-      const lastPart = parts[parts.length - 1];
-      const modelFileName = `${lastPart}.model.ts`;
-
-      function checkModelFile(args) {
-        function searchFile(dir) {
-          const files = fs.readdirSync(dir);
-
-          for (const file of files) {
-            const filePath = path.join(dir, file);
-            const stat = fs.statSync(filePath);
-
-            if (stat.isDirectory()) {
-              const found = searchFile(filePath);
-              if (found) return found;
-            } else if (file === modelFileName) {
-              return filePath;
-            }
-          }
-
-          return null;
-        }
-
-        const srcPath = path.join(process.cwd(), 'src');
-        const foundPath = searchFile(srcPath);
-
-        if (foundPath) {
-          return { exists: true, filePath: foundPath };
-        } else {
-          return { exists: false, filePath: null };
-        }
-      }
-
-      // Model exist or not checking
-      const modelExists = checkModelFile(process.argv.slice(2));
-
-      // Convert the last part of the path to camelCase if it contains '-' or '_'
-      const resourceName = parts.pop();
-
-      const resourceCamelCaseName = !specialCharRegex.test(args[0])
-        ? resourceName.toLowerCase()
-        : toCamelCase(resourceName);
-
-      const nestedFolders = parts;
-
-      const capitalizedResourceName = capitalize(resourceCamelCaseName);
-
-      const baseDir = path.join(__dirname, '..', 'src');
-
-      const moduleDir = path.join(baseDir, 'modules', ...nestedFolders, resourceName);
-
-      // Function to format file paths relative to project root
-      const formatPath = (filePath) => path.relative(path.join(__dirname, '..'), filePath);
-
-      // Create the nested directories
-      if (!fs.existsSync(moduleDir)) {
-        fs.mkdirSync(moduleDir, { recursive: true });
-      }
-
-      // Create route file content (similar to the original, adjusted for nested structure)
-      const routeContent = `
-// Import Router from express
-import { Router } from 'express';
-
-// Import controller from corresponding module
-import { 
-  create${capitalizedResourceName},
-  createMany${capitalizedResourceName},
-  update${capitalizedResourceName},
-  updateMany${capitalizedResourceName},
-  delete${capitalizedResourceName},
-  deleteMany${capitalizedResourceName},
-  get${capitalizedResourceName}ById,
-  getMany${capitalizedResourceName}
-} from './${resourceName}.controller';
-
-//Import validation from corresponding module
-import { validate${capitalizedResourceName} } from './${resourceName}.validation';
-import { validateId, validateIds } from '${Array(nestedFolders.length + 2)
-        .fill('..')
-        .join('/')}/handlers/common-zod-validator';
-      
-// Initialize router
-const router = Router();
-
-// Define route handlers
-/**
- * @route POST /api/v1/${nestedFolders.join('/')}/${resourceName}/create-${resourceName}
- * @description Create a new ${resourceName}
- * @access Public
- * @param {function} controller - ['create${capitalizedResourceName}']
- * @param {function} validation - ['validate${capitalizedResourceName}']
- */
-router.post("/create-${resourceName}", validate${capitalizedResourceName}, create${capitalizedResourceName});
-
-/**
- * @route POST /api/v1/${nestedFolders.join('/')}/${resourceName}/create-${resourceName}/many
- * @description Create multiple ${resourceName}
- * @access Public
- * @param {function} controller - ['createMany${capitalizedResourceName}']
- */
-router.post("/create-${resourceName}/many", createMany${capitalizedResourceName});
-
-/**
- * @route PUT /api/v1/${nestedFolders.join('/')}/${resourceName}/update-${resourceName}/many
- * @description Update multiple ${resourceName} information
- * @access Public
- * @param {function} controller - ['updateMany${capitalizedResourceName}']
- * @param {function} validation - ['validateIds']
- */
-router.put("/update-${resourceName}/many", validateIds, updateMany${capitalizedResourceName});
-
-/**
- * @route PUT /api/v1/${nestedFolders.join('/')}/${resourceName}/update-${resourceName}/:id
- * @description Update ${resourceName} information
- * @param {string} id - The ID of the ${resourceName} to update
- * @access Public
- * @param {function} controller - ['update${capitalizedResourceName}']
- * @param {function} validation - ['validateId', 'validate${capitalizedResourceName}']
- */
-router.put("/update-${resourceName}/:id", validateId, validate${capitalizedResourceName}, update${capitalizedResourceName});
-
-/**
- * @route DELETE /api/v1/${nestedFolders.join('/')}/${resourceName}/delete-${resourceName}/many
- * @description Delete multiple ${resourceName}
- * @access Public
- * @param {function} controller - ['deleteMany${capitalizedResourceName}']
- * @param {function} validation - ['validateIds']
- */
-router.delete("/delete-${resourceName}/many", validateIds, deleteMany${capitalizedResourceName});
-
-/**
- * @route DELETE /api/v1/${nestedFolders.join('/')}/${resourceName}/delete-${resourceName}/:id
- * @description Delete a ${resourceName}
- * @param {string} id - The ID of the ${resourceName} to delete
- * @access Public
- * @param {function} controller - ['delete${capitalizedResourceName}']
- * @param {function} validation - ['validateId']
- */
-router.delete("/delete-${resourceName}/:id", validateId, delete${capitalizedResourceName});
-
-/**
- * @route GET /api/v1/${nestedFolders.join('/')}/${resourceName}/get-${resourceName}/many
- * @description Get multiple ${resourceName}
- * @access Public
- * @param {function} controller - ['getMany${capitalizedResourceName}']
- * @param {function} validation - ['validateIds']
- */
-router.get("/get-${resourceName}/many", validateIds, getMany${capitalizedResourceName});
-
-/**
- * @route GET /api/v1/${nestedFolders.join('/')}/${resourceName}/get-${resourceName}/:id
- * @description Get a ${resourceName} by ID
- * @param {string} id - The ID of the ${resourceName} to retrieve
- * @access Public
- * @param {function} controller - ['get${capitalizedResourceName}ById']
- * @param {function} validation - ['validateId']
- */
-router.get("/get-${resourceName}/:id", validateId, get${capitalizedResourceName}ById);
-
-// Export the router
-module.exports = router;
-    `;
-
-      // Path to the route file
-      const routeFilePath = path.join(moduleDir, `${resourceName}.route.ts`);
-      fs.writeFileSync(routeFilePath, routeContent.trim());
-
-      // Create controller file content (similar to the original)
-      const controllerContent = `
-import { Request, Response } from 'express';
-import { ${resourceCamelCaseName}Services } from './${resourceName}.service';
-import ServerResponse from '${Array(nestedFolders.length + 2)
-        .fill('..')
-        .join('/')}/helpers/responses/custom-response';
-import catchAsync from '${Array(nestedFolders.length + 2)
-        .fill('..')
-        .join('/')}/utils/catch-async/catch-async';
-
-/**
- * Controller function to handle the creation of a single ${capitalizedResourceName}.
- *
- * @param {Request} req - The request object containing ${resourceName} data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {void}
- */
-export const create${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to create a new ${resourceName} and get the result
-  const result = await ${resourceCamelCaseName}Services.create${capitalizedResourceName}(req.body);
-  // Send a success response with the created resource data
-  ServerResponse(res, true, 201, '${capitalizedResourceName} created successfully', result);
-});
-
-/**
- * Controller function to handle the creation of multiple ${resourceName}.
- *
- * @param {Request} req - The request object containing an array of ${resourceName} data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {void}
- */
-export const createMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to create multiple ${resourceName} and get the result
-  const result = await ${resourceCamelCaseName}Services.createMany${capitalizedResourceName}(req.body);
-  // Send a success response with the created resources data
-  ServerResponse(res, true, 201, 'Resources created successfully', result);
-});
-
-/**
- * Controller function to handle the update operation for a single ${capitalizedResourceName}.
- *
- * @param {Request} req - The request object containing the ID of the ${resourceName} to update in URL parameters and the updated data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {void}
- */
-export const update${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  // Call the service method to update the ${resourceName} by ID and get the result
-  const result = await ${resourceCamelCaseName}Services.update${capitalizedResourceName}(id, req.body);
-  // Send a success response with the updated resource data
-  ServerResponse(res, true, 200, '${capitalizedResourceName} updated successfully', result);
-});
-
-/**
- * Controller function to handle the update operation for multiple ${resourceName}.
- *
- * @param {Request} req - The request object containing an array of ${resourceName} data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {void}
- */
-export const updateMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to update multiple ${resourceName} and get the result
-  const result = await ${resourceCamelCaseName}Services.updateMany${capitalizedResourceName}(req.body);
-  // Send a success response with the updated resources data
-  ServerResponse(res, true, 200, 'Resources updated successfully', result);
-});
-
-/**
- * Controller function to handle the deletion of a single ${capitalizedResourceName}.
- *
- * @param {Request} req - The request object containing the ID of the ${resourceName} to delete in URL parameters.
- * @param {Response} res - The response object used to send the response.
- * @returns {void}
- */
-export const delete${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  // Call the service method to delete the ${resourceName} by ID
-  await ${resourceCamelCaseName}Services.delete${capitalizedResourceName}(id);
-  // Send a success response confirming the deletion
-  ServerResponse(res, true, 200, '${capitalizedResourceName} deleted successfully');
-});
-
-/**
- * Controller function to handle the deletion of multiple ${resourceName}.
- *
- * @param {Request} req - The request object containing an array of IDs of ${resourceName} to delete in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {void}
- */
-export const deleteMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to delete multiple ${resourceName} and get the result
-  await ${resourceCamelCaseName}Services.deleteMany${capitalizedResourceName}(req.body);
-  // Send a success response confirming the deletions
-  ServerResponse(res, true, 200, 'Resources deleted successfully');
-});
-
-/**
- * Controller function to handle the retrieval of a single ${capitalizedResourceName} by ID.
- *
- * @param {Request} req - The request object containing the ID of the ${resourceName} to retrieve in URL parameters.
- * @param {Response} res - The response object used to send the response.
- * @returns {void}
- */
-export const get${capitalizedResourceName}ById = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  // Call the service method to get the ${resourceName} by ID and get the result
-  const result = await ${resourceCamelCaseName}Services.get${capitalizedResourceName}ById(id);
-  // Send a success response with the retrieved resource data
-  ServerResponse(res, true, 200, '${capitalizedResourceName} retrieved successfully', result);
-});
-
-/**
- * Controller function to handle the retrieval of multiple ${resourceName}.
- *
- * @param {Request} req - The request object containing query parameters for filtering.
- * @param {Response} res - The response object used to send the response.
- * @returns {void}
- */
-export const getMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to get multiple ${resourceName} based on query parameters and get the result
-  const result = await ${resourceCamelCaseName}Services.getMany${capitalizedResourceName}(req.query);
-  // Send a success response with the retrieved resources data
-  ServerResponse(res, true, 200, 'Resources retrieved successfully', result);
-});
-    `;
-
-      // Path to the controller file
-      const controllerFilePath = path.join(moduleDir, `${resourceName}.controller.ts`);
-      fs.writeFileSync(controllerFilePath, controllerContent.trim());
-
-      // Create model file (similar to the original)
-      const modelContent = `
-import mongoose, { Document, Schema } from 'mongoose';
-
-// Define and export an interface representing a ${capitalizedResourceName} document
-export interface I${capitalizedResourceName} extends Document {
-  // Define the schema fields with their types
-  // Example fields (replace with actual fields)
-  // fieldName: fieldType;
-}
-
-const ${capitalizedResourceName}Schema: Schema<I${capitalizedResourceName}> = new Schema({
-  // Define schema fields here
-  // Example fields (replace with actual schema)
-  // fieldName: {
-  //   type: Schema.Types.FieldType,
-  //   required: true,
-  //   trim: true,
-  // },
-},{
- timestamps: true,
- versionKey: false,
-});
-
-const ${capitalizedResourceName} = mongoose.model<I${capitalizedResourceName}>('${capitalizedResourceName}', ${capitalizedResourceName}Schema);
-
-export default ${capitalizedResourceName};
-    `;
-
-      const modelFilePath = path.join(moduleDir, `${resourceName}.model.ts`);
-      if (!modelExists.exists) {
-        // Path to the model file
-        fs.writeFileSync(modelFilePath, modelContent.trim());
-      }
-
-      // Create interface file content (similar to the original)
-      const interfaceContent = `
-export interface T${capitalizedResourceName} {
-  // Add fields as needed
-}
-    `;
-
-      // Path to the interface file
-      const interfaceFilePath = path.join(moduleDir, `${resourceName}.interface.ts`);
-      fs.writeFileSync(interfaceFilePath, interfaceContent.trim());
-
-      // Create Zod validation schema file (similar to the original)
-      const validationContent = `
-import { NextFunction, Request, Response } from 'express';
-import { z } from 'zod';
-import zodErrorHandler from '${Array(nestedFolders.length + 2)
-        .fill('..')
-        .join('/')}/handlers/zod-error-handler';
-
-/**
- * Zod schema for validating ${resourceName} data.
- */
-const zod${capitalizedResourceName}Schema = z.object({
-  // Define schema fields here
-}).strict();
-
-/**
- * Middleware function to validate ${resourceName} using Zod schema.
- * @param {object} req - The request object.
- * @param {object} res - The response object.
- * @param {function} next - The next middleware function.
- * @returns {void}
- */
-export const validate${capitalizedResourceName} = (req: Request, res: Response, next: NextFunction) => {
-  // Validate request body
-  const { error, success } = zod${capitalizedResourceName}Schema.safeParse(req.body);
-
-  // Check if validation was successful
-  if (!success) {
-    // If validation failed, use the Zod error handler to send an error response
-    return zodErrorHandler(req, res, error);
-  }
-
-  // If validation passed, proceed to the next middleware function
-  return next();
-};
-
-`;
-
-      // Path to the zod validation file
-      const validationFilePath = path.join(moduleDir, `${resourceName}.validation.ts`);
-      fs.writeFileSync(validationFilePath, validationContent.trim());
-
-      // Create service content
-      const serviceContent = `
-// Import the model
-import ${capitalizedResourceName}Model, { I${capitalizedResourceName} } from '${
-        modelExists.exists
-          ? `${Array(nestedFolders.length + 1)
-              .fill('..')
-              .join('/')}/${resourceName}/${resourceName}.model`
-          : `./${resourceName}.model`
-      }';
-
-/**
- * Service function to create a new ${resourceName}.
- *
- * @param {Partial<I${capitalizedResourceName}>} data - The data to create a new ${resourceName}.
- * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The created ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} creation fails.
- */
-const create${capitalizedResourceName} = async (data: Partial<I${capitalizedResourceName}>): Promise<Partial<I${capitalizedResourceName}>> => {
-  const new${capitalizedResourceName} = new ${capitalizedResourceName}Model(data);
-  const saved${capitalizedResourceName} = await new${capitalizedResourceName}.save();
-  if (!saved${capitalizedResourceName}) throw new Error('Failed to create ${resourceName}');
-  return saved${capitalizedResourceName};
-};
-
-/**
- * Service function to create multiple ${resourceName}.
- *
- * @param {Partial<I${capitalizedResourceName}>[]} data - An array of data to create multiple ${resourceName}.
- * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The created ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} creation fails.
- */
-const createMany${capitalizedResourceName} = async (data: Partial<I${capitalizedResourceName}>[]): Promise<Partial<I${capitalizedResourceName}>[]> => {
-  const created${capitalizedResourceName} = await ${capitalizedResourceName}Model.insertMany(data);
-  if (!created${capitalizedResourceName}) throw new Error('Failed to create multiple ${resourceName}');
-  return created${capitalizedResourceName};
-};
-
-/**
- * Service function to update a single ${resourceName} by ID.
- *
- * @param {string} id - The ID of the ${resourceName} to update.
- * @param {Partial<I${capitalizedResourceName}>} data - The updated data for the ${resourceName}.
- * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The updated ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} update fails.
- */
-const update${capitalizedResourceName} = async (id: string, data: Partial<I${capitalizedResourceName}>): Promise<Partial<I${capitalizedResourceName}>> => {
-  const updated${capitalizedResourceName} = await ${capitalizedResourceName}Model.findByIdAndUpdate(id, data, { new: true });
-  if (!updated${capitalizedResourceName}) throw new Error('Failed to update ${resourceName}');
-  return updated${capitalizedResourceName};
-};
-
-/**
- * Service function to update multiple ${resourceName}.
- *
- * @param {Array<{ id: string, updates: Partial<I${capitalizedResourceName}> }>} data - An array of data to update multiple ${resourceName}.
- * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The updated ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} update fails.
- */
-const updateMany${capitalizedResourceName} = async (data: Array<{ id: string, updates: Partial<I${capitalizedResourceName}> }>): Promise<Partial<I${capitalizedResourceName}>[]> => {
-  const updatePromises = data.map(({ id, updates }) =>
-    ${capitalizedResourceName}Model.findByIdAndUpdate(id, updates, { new: true })
-  );
-  const updated${capitalizedResourceName} = await Promise.all(updatePromises);
-  
-  // Filter out null values
-  const validUpdated${capitalizedResourceName} = updated${capitalizedResourceName}.filter(item => item !== null) as I${capitalizedResourceName}[];
-
-  if (!validUpdated${capitalizedResourceName}.length) throw new Error('Failed to update multiple ${resourceName}');
-  return validUpdated${capitalizedResourceName};
-};
-
-/**
- * Service function to delete a single ${resourceName} by ID.
- *
- * @param {string} id - The ID of the ${resourceName} to delete.
- * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The deleted ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
- */
-const delete${capitalizedResourceName} = async (id: string): Promise<Partial<I${capitalizedResourceName}>> => {
-  const deleted${capitalizedResourceName} = await ${capitalizedResourceName}Model.findByIdAndDelete(id);
-  if (!deleted${capitalizedResourceName}) throw new Error('Failed to delete ${resourceName}');
-  return deleted${capitalizedResourceName};
-};
-
-/**
- * Service function to delete multiple ${resourceName}.
- *
- * @param {string[]} ids - An array of IDs of ${resourceName} to delete.
- * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The deleted ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
- */
-const deleteMany${capitalizedResourceName} = async (ids: string[]): Promise<Partial<I${capitalizedResourceName}>[]> => {
-  const ${resourceName}ToDelete = await ${capitalizedResourceName}Model.find({ _id: { $in: ids } });
-  if (!${resourceName}ToDelete.length) throw new Error('No ${resourceName} found to delete');
-
-  const deleteResult = await ${capitalizedResourceName}Model.deleteMany({ _id: { $in: ids } });
-  if (deleteResult.deletedCount === 0) throw new Error('Failed to delete multiple ${resourceName}');
-  
-  return ${resourceName}ToDelete;  // Return the documents that were deleted
-};
-
-/**
- * Service function to retrieve a single ${resourceName} by ID.
- *
- * @param {string} id - The ID of the ${resourceName} to retrieve.
- * @returns {Promise<Partial<I${capitalizedResourceName}>>} - The retrieved ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
- */
-const get${capitalizedResourceName}ById = async (id: string): Promise<Partial<I${capitalizedResourceName}>> => {
-  const ${resourceName} = await ${capitalizedResourceName}Model.findById(id);
-  if (!${resourceName}) throw new Error('${resourceName} not found');
-  return ${resourceName};
-};
-
-/**
- * Service function to retrieve multiple ${resourceName} based on query parameters.
- *
- * @param {object} query - The query parameters for filtering ${resourceName}.
- * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The retrieved ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
- */
-const getMany${capitalizedResourceName} = async (query: object): Promise<Partial<I${capitalizedResourceName}>[]> => {
-  const ${resourceName} = await ${capitalizedResourceName}Model.find(query);
-  if (!${resourceName}) throw new Error('Failed to retrieve ${resourceName}');
-  return ${resourceName};
-};
-
-export const ${resourceName}Services = {
-  create${capitalizedResourceName},
-  createMany${capitalizedResourceName},
-  update${capitalizedResourceName},
-  updateMany${capitalizedResourceName},
-  delete${capitalizedResourceName},
-  deleteMany${capitalizedResourceName},
-  get${capitalizedResourceName}ById,
-  getMany${capitalizedResourceName},
-};
-    `;
-
-      // Path to the service file
-      const serviceFilePath = path.join(moduleDir, `${resourceName}.service.ts`);
-      // Write content to the service file
-      fs.writeFileSync(serviceFilePath, serviceContent.trim());
-
-      // Log the creation of the controller, interface, model , route, service & validation files
-      console.log(
-        `${GREEN}CREATE ${RESET}${formatPath(controllerFilePath)} ${BLUE}(${Buffer.byteLength(controllerContent, 'utf8')} bytes)`
-      );
-      console.log(
-        `${GREEN}CREATE ${RESET}${formatPath(interfaceFilePath)} ${BLUE}(${Buffer.byteLength(interfaceContent, 'utf8')} bytes)`
-      );
-
-      if (!modelExists.exists) {
-        fs.writeFileSync(modelFilePath, modelContent.trim());
-        console.log(
-          `${GREEN}CREATE ${RESET}${formatPath(modelFilePath)} ${BLUE}(${Buffer.byteLength(modelContent, 'utf8')} bytes)`
-        );
-      }
-      console.log(
-        `${GREEN}CREATE ${RESET}${formatPath(routeFilePath)} ${BLUE}(${Buffer.byteLength(routeContent, 'utf8')} bytes)`
-      );
-      console.log(
-        `${GREEN}CREATE ${RESET}${formatPath(
-          serviceFilePath
-        )} ${BLUE}(${Buffer.byteLength(serviceContent, 'utf8')} bytes)`
-      );
-      console.log(
-        `${GREEN}CREATE ${RESET}${formatPath(validationFilePath)} ${BLUE}(${Buffer.byteLength(validationContent, 'utf8')} bytes)`
       );
     });
 

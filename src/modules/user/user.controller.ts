@@ -8,11 +8,13 @@ import catchAsync from '../../utils/catch-async/catch-async';
  *
  * @param {Request} req - The request object containing user data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IUser>>} - The created user.
+ * @throws {Error} - Throws an error if the user creation fails.
  */
 export const createUser = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create a new user and get the result
   const result = await userServices.createUser(req.body);
+  if (!result) throw new Error('Failed to create user');
   // Send a success response with the created resource data
   ServerResponse(res, true, 201, 'User created successfully', result);
 });
@@ -22,13 +24,15 @@ export const createUser = catchAsync(async (req: Request, res: Response) => {
  *
  * @param {Request} req - The request object containing an array of user data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IUser>[]>} - The created user.
+ * @throws {Error} - Throws an error if the user creation fails.
  */
 export const createManyUser = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create multiple users and get the result
   const result = await userServices.createManyUser(req.body);
+  if (!result) throw new Error('Failed to create multiple user');
   // Send a success response with the created resources data
-  ServerResponse(res, true, 201, 'Resources created successfully', result);
+  ServerResponse(res, true, 201, 'Users created successfully', result);
 });
 
 /**
@@ -36,12 +40,14 @@ export const createManyUser = catchAsync(async (req: Request, res: Response) => 
  *
  * @param {Request} req - The request object containing the ID of the user to update in URL parameters and the updated data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IUser>>} - The updated user.
+ * @throws {Error} - Throws an error if the user update fails.
  */
 export const updateUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to update the user by ID and get the result
   const result = await userServices.updateUser(id, req.body);
+  if (!result) throw new Error('Failed to update user');
   // Send a success response with the updated resource data
   ServerResponse(res, true, 200, 'User updated successfully', result);
 });
@@ -51,13 +57,15 @@ export const updateUser = catchAsync(async (req: Request, res: Response) => {
  *
  * @param {Request} req - The request object containing an array of user data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IUser>[]>} - The updated user.
+ * @throws {Error} - Throws an error if the user update fails.
  */
 export const updateManyUser = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to update multiple user and get the result
   const result = await userServices.updateManyUser(req.body);
+  if (!result.length) throw new Error('Failed to update multiple user');
   // Send a success response with the updated resources data
-  ServerResponse(res, true, 200, 'Resources updated successfully', result);
+  ServerResponse(res, true, 200, 'Users updated successfully', result);
 });
 
 /**
@@ -65,12 +73,14 @@ export const updateManyUser = catchAsync(async (req: Request, res: Response) => 
  *
  * @param {Request} req - The request object containing the ID of the user to delete in URL parameters.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IUser>>} - The deleted user.
+ * @throws {Error} - Throws an error if the user deletion fails.
  */
 export const deleteUser = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to delete the user by ID
-  await userServices.deleteUser(id);
+  const result = await userServices.deleteUser(id);
+  if (!result) throw new Error('Failed to delete user');
   // Send a success response confirming the deletion
   ServerResponse(res, true, 200, 'User deleted successfully');
 });
@@ -80,13 +90,15 @@ export const deleteUser = catchAsync(async (req: Request, res: Response) => {
  *
  * @param {Request} req - The request object containing an array of IDs of user to delete in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IUser>[]>} - The deleted user.
+ * @throws {Error} - Throws an error if the user deletion fails.
  */
 export const deleteManyUser = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to delete multiple user and get the result
-  await userServices.deleteManyUser(req.body);
+  const result = await userServices.deleteManyUser(req.body);
+  if (!result) throw new Error('Failed to delete multiple user');
   // Send a success response confirming the deletions
-  ServerResponse(res, true, 200, 'Resources deleted successfully');
+  ServerResponse(res, true, 200, 'Users deleted successfully');
 });
 
 /**
@@ -94,12 +106,14 @@ export const deleteManyUser = catchAsync(async (req: Request, res: Response) => 
  *
  * @param {Request} req - The request object containing the ID of the user to retrieve in URL parameters.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IUser>>} - The retrieved user.
+ * @throws {Error} - Throws an error if the user retrieval fails.
  */
 export const getUserById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to get the user by ID and get the result
   const result = await userServices.getUserById(id);
+  if (!result) throw new Error('user not found');
   // Send a success response with the retrieved resource data
   ServerResponse(res, true, 200, 'User retrieved successfully', result);
 });
@@ -109,11 +123,13 @@ export const getUserById = catchAsync(async (req: Request, res: Response) => {
  *
  * @param {Request} req - The request object containing query parameters for filtering.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IUser>[]>} - The retrieved user.
+ * @throws {Error} - Throws an error if the user retrieval fails.
  */
 export const getManyUser = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to get multiple user based on query parameters and get the result
   const result = await userServices.getManyUser(req.query);
+  if (!result) throw new Error('Failed to retrieve user');
   // Send a success response with the retrieved resources data
-  ServerResponse(res, true, 200, 'Resources retrieved successfully', result);
+  ServerResponse(res, true, 200, 'Users retrieved successfully', result);
 });

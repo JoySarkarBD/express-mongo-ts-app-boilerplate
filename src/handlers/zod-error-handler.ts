@@ -18,8 +18,8 @@ const zodErrorHandler = (req: Request, res: Response, zodErr: ZodError): Respons
     message: err?.message,
   }));
 
-  // Log errors only in development environment
-  if (config.NODE_ENV === 'development') {
+  // Log errors in any mode except production
+  if (config.NODE_ENV !== 'production') {
     console.log(errors);
   }
 
