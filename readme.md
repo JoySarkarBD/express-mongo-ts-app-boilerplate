@@ -304,7 +304,7 @@ export default Blog;
 import { Router } from 'express';
 
 // Import controller from corresponding module
-import {
+import { 
   createBlog,
   createManyBlog,
   updateBlog,
@@ -312,11 +312,11 @@ import {
   deleteBlog,
   deleteManyBlog,
   getBlogById,
-  getManyBlog,
+  getManyBlog
 } from './blog.controller';
 
 //Import validation from corresponding module
-import { validateBlog } from './blog.validation';
+import { validateCreateBlog, validateCreateManyBlog, validateUpdateBlog, validateUpdateManyBlog} from './blog.validation';
 import { validateId, validateIds } from '../../handlers/common-zod-validator';
 
 // Initialize router
@@ -328,26 +328,27 @@ const router = Router();
  * @description Create a new blog
  * @access Public
  * @param {function} controller - ['createBlog']
- * @param {function} validation - ['validateBlog']
+ * @param {function} validation - ['validateCreateBlog']
  */
-router.post('/create-blog', validateBlog, createBlog);
+router.post("/create-blog", validateCreateBlog, createBlog);
 
 /**
  * @route POST /api/v1/blog/create-blog/many
  * @description Create multiple blog
  * @access Public
  * @param {function} controller - ['createManyBlog']
+ * @param {function} validation - ['validateCreateManyBlog']
  */
-router.post('/create-blog/many', createManyBlog);
+router.post("/create-blog/many", validateCreateManyBlog, createManyBlog);
 
 /**
  * @route PUT /api/v1/blog/update-blog/many
  * @description Update multiple blog information
  * @access Public
  * @param {function} controller - ['updateManyBlog']
- * @param {function} validation - ['validateIds']
+ * @param {function} validation - ['validateIds', 'validateUpdateManyBlog']
  */
-router.put('/update-blog/many', validateIds, updateManyBlog);
+router.put("/update-blog/many", validateIds, validateUpdateManyBlog, updateManyBlog);
 
 /**
  * @route PUT /api/v1/blog/update-blog/:id
@@ -355,9 +356,9 @@ router.put('/update-blog/many', validateIds, updateManyBlog);
  * @param {string} id - The ID of the blog to update
  * @access Public
  * @param {function} controller - ['updateBlog']
- * @param {function} validation - ['validateId', 'validateBlog']
+ * @param {function} validation - ['validateId', 'validateUpdateBlog']
  */
-router.put('/update-blog/:id', validateId, validateBlog, updateBlog);
+router.put("/update-blog/:id", validateId, validateUpdateBlog, updateBlog);
 
 /**
  * @route DELETE /api/v1/blog/delete-blog/many
@@ -366,7 +367,7 @@ router.put('/update-blog/:id', validateId, validateBlog, updateBlog);
  * @param {function} controller - ['deleteManyBlog']
  * @param {function} validation - ['validateIds']
  */
-router.delete('/delete-blog/many', validateIds, deleteManyBlog);
+router.delete("/delete-blog/many", validateIds, deleteManyBlog);
 
 /**
  * @route DELETE /api/v1/blog/delete-blog/:id
@@ -376,7 +377,7 @@ router.delete('/delete-blog/many', validateIds, deleteManyBlog);
  * @param {function} controller - ['deleteBlog']
  * @param {function} validation - ['validateId']
  */
-router.delete('/delete-blog/:id', validateId, deleteBlog);
+router.delete("/delete-blog/:id", validateId, deleteBlog);
 
 /**
  * @route POST /api/v1/blog/get-blog/many
@@ -385,7 +386,7 @@ router.delete('/delete-blog/:id', validateId, deleteBlog);
  * @param {function} controller - ['getManyBlog']
  * @param {function} validation - ['validateIds']
  */
-router.post('/get-blog/many', validateIds, getManyBlog);
+router.post("/get-blog/many", validateIds, getManyBlog);
 
 /**
  * @route GET /api/v1/blog/get-blog/:id
@@ -395,7 +396,7 @@ router.post('/get-blog/many', validateIds, getManyBlog);
  * @param {function} controller - ['getBlogById']
  * @param {function} validation - ['validateId']
  */
-router.get('/get-blog/:id', validateId, getBlogById);
+router.get("/get-blog/:id", validateId, getBlogById);
 
 // Export the router
 module.exports = router;
@@ -546,32 +547,101 @@ import { z } from 'zod';
 import zodErrorHandler from '../../handlers/zod-error-handler';
 
 /**
- * Zod schema for validating blog data.
+ * Zod schema for validating blog data during creation.
  */
-const zodBlogSchema = z
-  .object({
-    // Define schema fields here
-  })
-  .strict();
+const zodCreateBlogSchema = z.object({
+  // Define fields required for creating a new blog.
+  // Example:
+  // filedName: z.string({ required_error: 'Please provide a filedName.' }).min(1, "cannot be empty."),
+}).strict();
 
 /**
- * Middleware function to validate blog using Zod schema.
- * @param {object} req - The request object.
- * @param {object} res - The response object.
- * @param {function} next - The next middleware function.
+ * Middleware function to validate blog creation data using Zod schema.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next middleware function.
  * @returns {void}
  */
-export const validateBlog = (req: Request, res: Response, next: NextFunction) => {
-  // Validate request body
-  const { error, success } = zodBlogSchema.safeParse(req.body);
+export const validateCreateBlog = (req: Request, res: Response, next: NextFunction) => {
+  // Validate the request body for creating a new blog
+  const parseResult = zodCreateBlogSchema.safeParse(req.body);
 
-  // Check if validation was successful
-  if (!success) {
-    // If validation failed, use the Zod error handler to send an error response
-    return zodErrorHandler(req, res, error);
+  // If validation fails, send an error response using the Zod error handler
+  if (!parseResult.success) {
+    return zodErrorHandler(req, res, parseResult.error);
   }
 
-  // If validation passed, proceed to the next middleware function
+  // If validation passes, proceed to the next middleware function
+  return next();
+};
+
+/**
+ * Zod schema for validating multiple blog data during creation.
+ */
+const zodCreateManyBlogSchema = z.array(zodCreateBlogSchema);
+
+/**
+ * Middleware function to validate multiple blog creation data using Zod schema.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next middleware function.
+ * @returns {void}
+ */
+export const validateCreateManyBlog = (req: Request, res: Response, next: NextFunction) => {
+  const parseResult = zodCreateManyBlogSchema.safeParse(req.body);
+  if (!parseResult.success) {
+    return zodErrorHandler(req, res, parseResult.error);
+  }
+  return next();
+};
+
+/**
+ * Zod schema for validating blog data during updates.
+ */
+const zodUpdateBlogSchema = z.object({
+  // Define fields required for updating an existing blog.
+  // Example:
+  // fieldName: z.string({ required_error: 'Please provide a filedName.' }).optional(), // Fields can be optional during updates
+}).strict();
+
+/**
+ * Middleware function to validate blog update data using Zod schema.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next middleware function.
+ * @returns {void}
+ */
+export const validateUpdateBlog = (req: Request, res: Response, next: NextFunction) => {
+  // Validate the request body for updating an existing blog
+  const parseResult = zodUpdateBlogSchema.safeParse(req.body);
+
+  // If validation fails, send an error response using the Zod error handler
+  if (!parseResult.success) {
+    return zodErrorHandler(req, res, parseResult.error);
+  }
+
+  // If validation passes, proceed to the next middleware function
+  return next();
+};
+
+/**
+ * Zod schema for validating multiple blog data during updates.
+ */
+const zodUpdateManyBlogSchema = z.array(zodUpdateBlogSchema);
+
+
+/**
+ * Middleware function to validate multiple blog update data using Zod schema.
+ * @param {Request} req - The request object.
+ * @param {Response} res - The response object.
+ * @param {NextFunction} next - The next middleware function.
+ * @returns {void}
+ */
+export const validateUpdateManyBlog = (req: Request, res: Response, next: NextFunction) => {
+  const parseResult = zodUpdateManyBlogSchema.safeParse(req.body);
+  if (!parseResult.success) {
+    return zodErrorHandler(req, res, parseResult.error);
+  }
   return next();
 };
 ```
