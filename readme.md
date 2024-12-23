@@ -552,7 +552,7 @@ import zodErrorHandler from '../../handlers/zod-error-handler';
 const zodCreateBlogSchema = z.object({
   // Define fields required for creating a new blog.
   // Example:
-  // filedName: z.string({ required_error: 'Please provide a filedName.' }).min(1, "cannot be empty."),
+  // filedName: z.string({ required_error: 'Please provide a filedName.' }).min(1, "Can't be empty."),
 }).strict();
 
 /**
