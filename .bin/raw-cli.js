@@ -69,7 +69,7 @@ import {
 
 //Import validation from corresponding module
 import { validateCreate${capitalizedResourceName}, validateCreateMany${capitalizedResourceName}, validateUpdate${capitalizedResourceName}, validateUpdateMany${capitalizedResourceName}} from './${args[0]}.validation';
-import { validateId, validateIds } from '../../handlers/common-zod-validator';
+import { validateId, validateIds, validateSearchQueries } from '../../handlers/common-zod-validator';
 
 // Initialize router
 const router = Router();
@@ -132,13 +132,13 @@ router.delete("/delete-${args[0]}/many", validateIds, deleteMany${capitalizedRes
 router.delete("/delete-${args[0]}/:id", validateId, delete${capitalizedResourceName});
 
 /**
- * @route POST /api/v1/${args[0]}/get-${args[0]}/many
+ * @route GET /api/v1/${args[0]}/get-${args[0]}/many
  * @description Get multiple ${args[0]}
  * @access Public
  * @param {function} controller - ['getMany${capitalizedResourceName}']
- * @param {function} validation - ['validateIds']
+ * @param {function} validation - ['validateSearchQueries']
  */
-router.post("/get-${args[0]}/many", validateIds, getMany${capitalizedResourceName});
+router.get("/get-${args[0]}/many", validateSearchQueries, getMany${capitalizedResourceName});
 
 /**
  * @route GET /api/v1/${args[0]}/get-${args[0]}/:id
@@ -289,11 +289,13 @@ export const get${capitalizedResourceName}ById = catchAsync(async (req: Request,
  * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
  */
 export const getMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
+  // Type assertion for query parameters 
+  const query = req.query as unknown as { searchKey?: string, showPerPage: number, pageNo: number };
   // Call the service method to get multiple ${args[0]} based on query parameters and get the result
-  const result = await ${resourceName}Services.getMany${capitalizedResourceName}(req.query);
-  if (!result) throw new Error('Failed to retrieve ${resourceName}');
+  const { ${resourceName}s, totalData, totalPages } = await ${resourceName}Services.getMany${capitalizedResourceName}(query);
+  if (!${resourceName}s) throw new Error('Failed to retrieve ${resourceName}');
   // Send a success response with the retrieved resources data
-  ServerResponse(res, true, 200, '${capitalizedResourceName}s retrieved successfully', result);
+  ServerResponse(res, true, 200, '${capitalizedResourceName}s retrieved successfully', { ${resourceName}s, totalData, totalPages });
 });
     `;
       // Path to the controller file
@@ -559,11 +561,40 @@ const get${capitalizedResourceName}ById = async (id: string): Promise<Partial<I$
  * Service function to retrieve multiple ${resourceName} based on query parameters.
  *
  * @param {object} query - The query parameters for filtering ${resourceName}.
- * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The retrieved ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The retrieved ${resourceName}
  */
-const getMany${capitalizedResourceName} = async (query: object): Promise<Partial<I${capitalizedResourceName}>[]> => {
-  const ${resourceName} = await ${capitalizedResourceName}Model.find(query);
-  return ${resourceName};
+const getMany${capitalizedResourceName} = async (query: {
+  searchKey?: string;
+  showPerPage: number;
+  pageNo: number;
+}): Promise<{ ${resourceName}s: Partial<I${capitalizedResourceName}>[]; totalData: number; totalPages: number }> => {
+  const { searchKey = '', showPerPage, pageNo } = query;
+
+  // Build the search filter based on the search key
+  const searchFilter = {
+    $or: [
+      { fieldName: { $regex: searchKey, $options: 'i' } },
+      { fieldName: { $regex: searchKey, $options: 'i' } },
+      // Add more fields as needed
+    ],
+  };
+
+  // Calculate the number of items to skip based on the page number
+  const skipItems = (pageNo - 1) * showPerPage;
+
+  // Find the total count of matching ${resourceName}
+  const totalData = await ${capitalizedResourceName}Model.countDocuments(searchFilter);
+
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(totalData / showPerPage);
+
+  // Find ${resourceName} based on the search filter with pagination
+  const ${resourceName}s = await ${capitalizedResourceName}Model.find(searchFilter)
+    .skip(skipItems)
+    .limit(showPerPage)
+    .select(''); // Keep/Exclude any field if needed
+
+  return { ${resourceName}s, totalData, totalPages };
 };
 
 export const ${resourceName}Services = {

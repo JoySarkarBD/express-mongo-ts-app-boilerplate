@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { userServices } from './user.service';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
+import { userServices } from './user.service';
 
 /**
  * Controller function to handle the creation of a single User.
@@ -127,9 +127,12 @@ export const getUserById = catchAsync(async (req: Request, res: Response) => {
  * @throws {Error} - Throws an error if the user retrieval fails.
  */
 export const getManyUser = catchAsync(async (req: Request, res: Response) => {
+  // Type assertion for query parameters
+  const query = req.query as unknown as { searchKey?: string; showPerPage: number; pageNo: number };
   // Call the service method to get multiple user based on query parameters and get the result
-  const result = await userServices.getManyUser(req.query);
-  if (!result) throw new Error('Failed to retrieve user');
+  const { users, totalData, totalPages } = await userServices.getManyUser(query);
+  if (!users) throw new Error('Failed to retrieve user');
   // Send a success response with the retrieved resources data
-  ServerResponse(res, true, 200, 'Users retrieved successfully', result);
+  ServerResponse(res, true, 200, 'Users retrieved successfully', { users, totalData, totalPages });
 });
+

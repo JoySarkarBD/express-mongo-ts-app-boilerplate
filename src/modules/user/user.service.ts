@@ -42,13 +42,15 @@ const updateUser = async (id: string, data: Partial<IUser>): Promise<Partial<IUs
  * @param {Array<{ id: string, updates: Partial<IUser> }>} data - An array of data to update multiple user.
  * @returns {Promise<Partial<IUser>[]>} - The updated user.
  */
-const updateManyUser = async (data: Array<{ id: string, updates: Partial<IUser> }>): Promise<Partial<IUser>[]> => {
+const updateManyUser = async (
+  data: Array<{ id: string; updates: Partial<IUser> }>
+): Promise<Partial<IUser>[]> => {
   const updatePromises = data.map(({ id, updates }) =>
     UserModel.findByIdAndUpdate(id, updates, { new: true })
   );
   const updatedUser = await Promise.all(updatePromises);
   // Filter out null values
-  const validUpdatedUser = updatedUser.filter(item => item !== null) as IUser[];
+  const validUpdatedUser = updatedUser.filter((item) => item !== null) as IUser[];
   return validUpdatedUser;
 };
 
@@ -73,7 +75,7 @@ const deleteManyUser = async (ids: string[]): Promise<Partial<IUser>[]> => {
   const userToDelete = await UserModel.find({ _id: { $in: ids } });
   if (!userToDelete.length) throw new Error('No user found to delete');
   await UserModel.deleteMany({ _id: { $in: ids } });
-  return userToDelete; 
+  return userToDelete;
 };
 
 /**
@@ -88,14 +90,43 @@ const getUserById = async (id: string): Promise<Partial<IUser | null>> => {
 };
 
 /**
- * Service function to retrieve multiple user based on query parameters.
+ * Service function to retrieve multiple users based on query parameters.
  *
- * @param {object} query - The query parameters for filtering user.
- * @returns {Promise<Partial<IUser>[]>} - The retrieved user.
+ * @param {object} query - The query parameters for filtering users.
+ * @returns {Promise<Partial<IUser>[]>} - The retrieved users.
  */
-const getManyUser = async (query: object): Promise<Partial<IUser>[]> => {
-  const user = await UserModel.find(query);
-  return user;
+const getManyUser = async (query: {
+  searchKey?: string;
+  showPerPage: number;
+  pageNo: number;
+}): Promise<{ users: Partial<IUser>[]; totalData: number; totalPages: number }> => {
+  const { searchKey = '', showPerPage, pageNo } = query;
+
+  // Build the search filter based on the search key
+  const searchFilter = {
+    $or: [
+      { username: { $regex: searchKey, $options: 'i' } },
+      { email: { $regex: searchKey, $options: 'i' } },
+      // Add more fields as needed
+    ],
+  };
+
+  // Calculate the number of items to skip based on the page number
+  const skipItems = (pageNo - 1) * showPerPage;
+
+  // Find the total count of matching users
+  const totalData = await UserModel.countDocuments(searchFilter);
+
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(totalData / showPerPage);
+
+  // Find users based on the search filter with pagination
+  const users = await UserModel.find(searchFilter)
+    .skip(skipItems)
+    .limit(showPerPage)
+    .select('-password'); // Exclude password field if needed
+
+  return { users, totalData, totalPages };
 };
 
 export const userServices = {
@@ -108,3 +139,4 @@ export const userServices = {
   getUserById,
   getManyUser,
 };
+

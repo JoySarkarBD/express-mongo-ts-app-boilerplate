@@ -136,11 +136,13 @@ import catchAsync from '../../utils/catch-async/catch-async';
  *
  * @param {Request} req - The request object containing blog data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IBlog>>} - The created blog.
+ * @throws {Error} - Throws an error if the blog creation fails.
  */
 export const createBlog = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create a new blog and get the result
   const result = await blogServices.createBlog(req.body);
+  if (!result) throw new Error('Failed to create blog');
   // Send a success response with the created resource data
   ServerResponse(res, true, 201, 'Blog created successfully', result);
 });
@@ -150,13 +152,15 @@ export const createBlog = catchAsync(async (req: Request, res: Response) => {
  *
  * @param {Request} req - The request object containing an array of blog data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IBlog>[]>} - The created blog.
+ * @throws {Error} - Throws an error if the blog creation fails.
  */
 export const createManyBlog = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create multiple blogs and get the result
   const result = await blogServices.createManyBlog(req.body);
+  if (!result) throw new Error('Failed to create multiple blog');
   // Send a success response with the created resources data
-  ServerResponse(res, true, 201, 'Resources created successfully', result);
+  ServerResponse(res, true, 201, 'Blogs created successfully', result);
 });
 
 /**
@@ -164,12 +168,14 @@ export const createManyBlog = catchAsync(async (req: Request, res: Response) => 
  *
  * @param {Request} req - The request object containing the ID of the blog to update in URL parameters and the updated data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IBlog>>} - The updated blog.
+ * @throws {Error} - Throws an error if the blog update fails.
  */
 export const updateBlog = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to update the blog by ID and get the result
   const result = await blogServices.updateBlog(id, req.body);
+  if (!result) throw new Error('Failed to update blog');
   // Send a success response with the updated resource data
   ServerResponse(res, true, 200, 'Blog updated successfully', result);
 });
@@ -179,13 +185,15 @@ export const updateBlog = catchAsync(async (req: Request, res: Response) => {
  *
  * @param {Request} req - The request object containing an array of blog data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IBlog>[]>} - The updated blog.
+ * @throws {Error} - Throws an error if the blog update fails.
  */
 export const updateManyBlog = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to update multiple blog and get the result
   const result = await blogServices.updateManyBlog(req.body);
+  if (!result.length) throw new Error('Failed to update multiple blog');
   // Send a success response with the updated resources data
-  ServerResponse(res, true, 200, 'Resources updated successfully', result);
+  ServerResponse(res, true, 200, 'Blogs updated successfully', result);
 });
 
 /**
@@ -193,12 +201,14 @@ export const updateManyBlog = catchAsync(async (req: Request, res: Response) => 
  *
  * @param {Request} req - The request object containing the ID of the blog to delete in URL parameters.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IBlog>>} - The deleted blog.
+ * @throws {Error} - Throws an error if the blog deletion fails.
  */
 export const deleteBlog = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to delete the blog by ID
-  await blogServices.deleteBlog(id);
+  const result = await blogServices.deleteBlog(id);
+  if (!result) throw new Error('Failed to delete blog');
   // Send a success response confirming the deletion
   ServerResponse(res, true, 200, 'Blog deleted successfully');
 });
@@ -208,13 +218,15 @@ export const deleteBlog = catchAsync(async (req: Request, res: Response) => {
  *
  * @param {Request} req - The request object containing an array of IDs of blog to delete in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IBlog>[]>} - The deleted blog.
+ * @throws {Error} - Throws an error if the blog deletion fails.
  */
 export const deleteManyBlog = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to delete multiple blog and get the result
-  await blogServices.deleteManyBlog(req.body);
+  const result = await blogServices.deleteManyBlog(req.body);
+  if (!result) throw new Error('Failed to delete multiple blog');
   // Send a success response confirming the deletions
-  ServerResponse(res, true, 200, 'Resources deleted successfully');
+  ServerResponse(res, true, 200, 'Blogs deleted successfully');
 });
 
 /**
@@ -222,12 +234,14 @@ export const deleteManyBlog = catchAsync(async (req: Request, res: Response) => 
  *
  * @param {Request} req - The request object containing the ID of the blog to retrieve in URL parameters.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IBlog>>} - The retrieved blog.
+ * @throws {Error} - Throws an error if the blog retrieval fails.
  */
 export const getBlogById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to get the blog by ID and get the result
   const result = await blogServices.getBlogById(id);
+  if (!result) throw new Error('blog not found');
   // Send a success response with the retrieved resource data
   ServerResponse(res, true, 200, 'Blog retrieved successfully', result);
 });
@@ -237,13 +251,17 @@ export const getBlogById = catchAsync(async (req: Request, res: Response) => {
  *
  * @param {Request} req - The request object containing query parameters for filtering.
  * @param {Response} res - The response object used to send the response.
- * @returns {void}
+ * @returns {Promise<Partial<IBlog>[]>} - The retrieved blog.
+ * @throws {Error} - Throws an error if the blog retrieval fails.
  */
 export const getManyBlog = catchAsync(async (req: Request, res: Response) => {
+  // Type assertion for query parameters
+  const query = req.query as unknown as { searchKey?: string; showPerPage: number; pageNo: number };
   // Call the service method to get multiple blog based on query parameters and get the result
-  const result = await blogServices.getManyBlog(req.query);
+  const { blogs, totalData, totalPages } = await blogServices.getManyBlog(query);
+  if (!blogs) throw new Error('Failed to retrieve blog');
   // Send a success response with the retrieved resources data
-  ServerResponse(res, true, 200, 'Resources retrieved successfully', result);
+  ServerResponse(res, true, 200, 'Blogs retrieved successfully', { blogs, totalData, totalPages });
 });
 ```
 
@@ -304,7 +322,7 @@ export default Blog;
 import { Router } from 'express';
 
 // Import controller from corresponding module
-import { 
+import {
   createBlog,
   createManyBlog,
   updateBlog,
@@ -312,12 +330,21 @@ import {
   deleteBlog,
   deleteManyBlog,
   getBlogById,
-  getManyBlog
+  getManyBlog,
 } from './blog.controller';
 
 //Import validation from corresponding module
-import { validateCreateBlog, validateCreateManyBlog, validateUpdateBlog, validateUpdateManyBlog} from './blog.validation';
-import { validateId, validateIds } from '../../handlers/common-zod-validator';
+import {
+  validateCreateBlog,
+  validateCreateManyBlog,
+  validateUpdateBlog,
+  validateUpdateManyBlog,
+} from './blog.validation';
+import {
+  validateId,
+  validateIds,
+  validateSearchQueries,
+} from '../../handlers/common-zod-validator';
 
 // Initialize router
 const router = Router();
@@ -330,7 +357,7 @@ const router = Router();
  * @param {function} controller - ['createBlog']
  * @param {function} validation - ['validateCreateBlog']
  */
-router.post("/create-blog", validateCreateBlog, createBlog);
+router.post('/create-blog', validateCreateBlog, createBlog);
 
 /**
  * @route POST /api/v1/blog/create-blog/many
@@ -339,7 +366,7 @@ router.post("/create-blog", validateCreateBlog, createBlog);
  * @param {function} controller - ['createManyBlog']
  * @param {function} validation - ['validateCreateManyBlog']
  */
-router.post("/create-blog/many", validateCreateManyBlog, createManyBlog);
+router.post('/create-blog/many', validateCreateManyBlog, createManyBlog);
 
 /**
  * @route PUT /api/v1/blog/update-blog/many
@@ -348,7 +375,7 @@ router.post("/create-blog/many", validateCreateManyBlog, createManyBlog);
  * @param {function} controller - ['updateManyBlog']
  * @param {function} validation - ['validateIds', 'validateUpdateManyBlog']
  */
-router.put("/update-blog/many", validateIds, validateUpdateManyBlog, updateManyBlog);
+router.put('/update-blog/many', validateIds, validateUpdateManyBlog, updateManyBlog);
 
 /**
  * @route PUT /api/v1/blog/update-blog/:id
@@ -358,7 +385,7 @@ router.put("/update-blog/many", validateIds, validateUpdateManyBlog, updateManyB
  * @param {function} controller - ['updateBlog']
  * @param {function} validation - ['validateId', 'validateUpdateBlog']
  */
-router.put("/update-blog/:id", validateId, validateUpdateBlog, updateBlog);
+router.put('/update-blog/:id', validateId, validateUpdateBlog, updateBlog);
 
 /**
  * @route DELETE /api/v1/blog/delete-blog/many
@@ -367,7 +394,7 @@ router.put("/update-blog/:id", validateId, validateUpdateBlog, updateBlog);
  * @param {function} controller - ['deleteManyBlog']
  * @param {function} validation - ['validateIds']
  */
-router.delete("/delete-blog/many", validateIds, deleteManyBlog);
+router.delete('/delete-blog/many', validateIds, deleteManyBlog);
 
 /**
  * @route DELETE /api/v1/blog/delete-blog/:id
@@ -377,16 +404,16 @@ router.delete("/delete-blog/many", validateIds, deleteManyBlog);
  * @param {function} controller - ['deleteBlog']
  * @param {function} validation - ['validateId']
  */
-router.delete("/delete-blog/:id", validateId, deleteBlog);
+router.delete('/delete-blog/:id', validateId, deleteBlog);
 
 /**
- * @route POST /api/v1/blog/get-blog/many
+ * @route GET /api/v1/blog/get-blog/many
  * @description Get multiple blog
  * @access Public
  * @param {function} controller - ['getManyBlog']
- * @param {function} validation - ['validateIds']
+ * @param {function} validation - ['validateSearchQueries']
  */
-router.post("/get-blog/many", validateIds, getManyBlog);
+router.get('/get-blog/many', validateSearchQueries, getManyBlog);
 
 /**
  * @route GET /api/v1/blog/get-blog/:id
@@ -396,7 +423,7 @@ router.post("/get-blog/many", validateIds, getManyBlog);
  * @param {function} controller - ['getBlogById']
  * @param {function} validation - ['validateId']
  */
-router.get("/get-blog/:id", validateId, getBlogById);
+router.get('/get-blog/:id', validateId, getBlogById);
 
 // Export the router
 module.exports = router;
@@ -413,12 +440,10 @@ import BlogModel, { IBlog } from './blog.model';
  *
  * @param {Partial<IBlog>} data - The data to create a new blog.
  * @returns {Promise<Partial<IBlog>>} - The created blog.
- * @throws {Error} - Throws an error if the blog creation fails.
  */
 const createBlog = async (data: Partial<IBlog>): Promise<Partial<IBlog>> => {
   const newBlog = new BlogModel(data);
   const savedBlog = await newBlog.save();
-  if (!savedBlog) throw new Error('Failed to create blog');
   return savedBlog;
 };
 
@@ -427,11 +452,9 @@ const createBlog = async (data: Partial<IBlog>): Promise<Partial<IBlog>> => {
  *
  * @param {Partial<IBlog>[]} data - An array of data to create multiple blog.
  * @returns {Promise<Partial<IBlog>[]>} - The created blog.
- * @throws {Error} - Throws an error if the blog creation fails.
  */
 const createManyBlog = async (data: Partial<IBlog>[]): Promise<Partial<IBlog>[]> => {
   const createdBlog = await BlogModel.insertMany(data);
-  if (!createdBlog) throw new Error('Failed to create multiple blog');
   return createdBlog;
 };
 
@@ -441,11 +464,9 @@ const createManyBlog = async (data: Partial<IBlog>[]): Promise<Partial<IBlog>[]>
  * @param {string} id - The ID of the blog to update.
  * @param {Partial<IBlog>} data - The updated data for the blog.
  * @returns {Promise<Partial<IBlog>>} - The updated blog.
- * @throws {Error} - Throws an error if the blog update fails.
  */
-const updateBlog = async (id: string, data: Partial<IBlog>): Promise<Partial<IBlog>> => {
+const updateBlog = async (id: string, data: Partial<IBlog>): Promise<Partial<IBlog | null>> => {
   const updatedBlog = await BlogModel.findByIdAndUpdate(id, data, { new: true });
-  if (!updatedBlog) throw new Error('Failed to update blog');
   return updatedBlog;
 };
 
@@ -454,7 +475,6 @@ const updateBlog = async (id: string, data: Partial<IBlog>): Promise<Partial<IBl
  *
  * @param {Array<{ id: string, updates: Partial<IBlog> }>} data - An array of data to update multiple blog.
  * @returns {Promise<Partial<IBlog>[]>} - The updated blog.
- * @throws {Error} - Throws an error if the blog update fails.
  */
 const updateManyBlog = async (
   data: Array<{ id: string; updates: Partial<IBlog> }>
@@ -463,11 +483,8 @@ const updateManyBlog = async (
     BlogModel.findByIdAndUpdate(id, updates, { new: true })
   );
   const updatedBlog = await Promise.all(updatePromises);
-
   // Filter out null values
   const validUpdatedBlog = updatedBlog.filter((item) => item !== null) as IBlog[];
-
-  if (!validUpdatedBlog.length) throw new Error('Failed to update multiple blog');
   return validUpdatedBlog;
 };
 
@@ -476,11 +493,9 @@ const updateManyBlog = async (
  *
  * @param {string} id - The ID of the blog to delete.
  * @returns {Promise<Partial<IBlog>>} - The deleted blog.
- * @throws {Error} - Throws an error if the blog deletion fails.
  */
-const deleteBlog = async (id: string): Promise<Partial<IBlog>> => {
+const deleteBlog = async (id: string): Promise<Partial<IBlog | null>> => {
   const deletedBlog = await BlogModel.findByIdAndDelete(id);
-  if (!deletedBlog) throw new Error('Failed to delete blog');
   return deletedBlog;
 };
 
@@ -489,16 +504,12 @@ const deleteBlog = async (id: string): Promise<Partial<IBlog>> => {
  *
  * @param {string[]} ids - An array of IDs of blog to delete.
  * @returns {Promise<Partial<IBlog>[]>} - The deleted blog.
- * @throws {Error} - Throws an error if the blog deletion fails.
  */
 const deleteManyBlog = async (ids: string[]): Promise<Partial<IBlog>[]> => {
   const blogToDelete = await BlogModel.find({ _id: { $in: ids } });
   if (!blogToDelete.length) throw new Error('No blog found to delete');
-
-  const deleteResult = await BlogModel.deleteMany({ _id: { $in: ids } });
-  if (deleteResult.deletedCount === 0) throw new Error('Failed to delete multiple blog');
-
-  return blogToDelete; // Return the documents that were deleted
+  await BlogModel.deleteMany({ _id: { $in: ids } });
+  return blogToDelete;
 };
 
 /**
@@ -506,11 +517,9 @@ const deleteManyBlog = async (ids: string[]): Promise<Partial<IBlog>[]> => {
  *
  * @param {string} id - The ID of the blog to retrieve.
  * @returns {Promise<Partial<IBlog>>} - The retrieved blog.
- * @throws {Error} - Throws an error if the blog retrieval fails.
  */
-const getBlogById = async (id: string): Promise<Partial<IBlog>> => {
+const getBlogById = async (id: string): Promise<Partial<IBlog | null>> => {
   const blog = await BlogModel.findById(id);
-  if (!blog) throw new Error('blog not found');
   return blog;
 };
 
@@ -518,13 +527,37 @@ const getBlogById = async (id: string): Promise<Partial<IBlog>> => {
  * Service function to retrieve multiple blog based on query parameters.
  *
  * @param {object} query - The query parameters for filtering blog.
- * @returns {Promise<Partial<IBlog>[]>} - The retrieved blog.
- * @throws {Error} - Throws an error if the blog retrieval fails.
+ * @returns {Promise<Partial<IBlog>[]>} - The retrieved blog
  */
-const getManyBlog = async (query: object): Promise<Partial<IBlog>[]> => {
-  const blog = await BlogModel.find(query);
-  if (!blog) throw new Error('Failed to retrieve blog');
-  return blog;
+const getManyBlog = async (query: {
+  searchKey?: string;
+  showPerPage: number;
+  pageNo: number;
+}): Promise<{ blogs: Partial<IBlog>[]; totalData: number; totalPages: number }> => {
+  const { searchKey = '', showPerPage, pageNo } = query;
+
+  // Build the search filter based on the search key
+  const searchFilter = {
+    $or: [
+      { fieldName: { $regex: searchKey, $options: 'i' } },
+      { fieldName: { $regex: searchKey, $options: 'i' } },
+      // Add more fields as needed
+    ],
+  };
+
+  // Calculate the number of items to skip based on the page number
+  const skipItems = (pageNo - 1) * showPerPage;
+
+  // Find the total count of matching blog
+  const totalData = await BlogModel.countDocuments(searchFilter);
+
+  // Calculate the total number of pages
+  const totalPages = Math.ceil(totalData / showPerPage);
+
+  // Find blog based on the search filter with pagination
+  const blogs = await BlogModel.find(searchFilter).skip(skipItems).limit(showPerPage).select(''); // Keep/Exclude any field if needed
+
+  return { blogs, totalData, totalPages };
 };
 
 export const blogServices = {
@@ -549,11 +582,13 @@ import zodErrorHandler from '../../handlers/zod-error-handler';
 /**
  * Zod schema for validating blog data during creation.
  */
-const zodCreateBlogSchema = z.object({
-  // Define fields required for creating a new blog.
-  // Example:
-  // filedName: z.string({ required_error: 'Please provide a filedName.' }).min(1, "Can't be empty."),
-}).strict();
+const zodCreateBlogSchema = z
+  .object({
+    // Define fields required for creating a new blog.
+    // Example:
+    // filedName: z.string({ required_error: 'Please provide a filedName.' }).min(1, "Can't be empty."),
+  })
+  .strict();
 
 /**
  * Middleware function to validate blog creation data using Zod schema.
@@ -598,11 +633,13 @@ export const validateCreateManyBlog = (req: Request, res: Response, next: NextFu
 /**
  * Zod schema for validating blog data during updates.
  */
-const zodUpdateBlogSchema = z.object({
-  // Define fields required for updating an existing blog.
-  // Example:
-  // fieldName: z.string({ required_error: 'Please provide a filedName.' }).optional(), // Fields can be optional during updates
-}).strict();
+const zodUpdateBlogSchema = z
+  .object({
+    // Define fields required for updating an existing blog.
+    // Example:
+    // fieldName: z.string({ required_error: 'Please provide a filedName.' }).optional(), // Fields can be optional during updates
+  })
+  .strict();
 
 /**
  * Middleware function to validate blog update data using Zod schema.
@@ -628,7 +665,6 @@ export const validateUpdateBlog = (req: Request, res: Response, next: NextFuncti
  * Zod schema for validating multiple blog data during updates.
  */
 const zodUpdateManyBlogSchema = z.array(zodUpdateBlogSchema);
-
 
 /**
  * Middleware function to validate multiple blog update data using Zod schema.
