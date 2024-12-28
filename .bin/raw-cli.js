@@ -86,7 +86,7 @@ router.post("/create-${args[0]}", validateCreate${capitalizedResourceName}, crea
 
 /**
  * @route POST /api/v1/${args[0]}/create-${args[0]}/many
- * @description Create multiple ${args[0]}
+ * @description Create multiple ${args[0]}s
  * @access Public
  * @param {function} controller - ['createMany${capitalizedResourceName}']
  * @param {function} validation - ['validateCreateMany${capitalizedResourceName}']
@@ -95,7 +95,7 @@ router.post("/create-${args[0]}/many", validateCreateMany${capitalizedResourceNa
 
 /**
  * @route PUT /api/v1/${args[0]}/update-${args[0]}/many
- * @description Update multiple ${args[0]} information
+ * @description Update multiple ${args[0]}s information
  * @access Public
  * @param {function} controller - ['updateMany${capitalizedResourceName}']
  * @param {function} validation - ['validateIds', 'validateUpdateMany${capitalizedResourceName}']
@@ -114,7 +114,7 @@ router.put("/update-${args[0]}/:id", validateId, validateUpdate${capitalizedReso
 
 /**
  * @route DELETE /api/v1/${args[0]}/delete-${args[0]}/many
- * @description Delete multiple ${args[0]}
+ * @description Delete multiple ${args[0]}s
  * @access Public
  * @param {function} controller - ['deleteMany${capitalizedResourceName}']
  * @param {function} validation - ['validateIds']
@@ -133,7 +133,7 @@ router.delete("/delete-${args[0]}/:id", validateId, delete${capitalizedResourceN
 
 /**
  * @route GET /api/v1/${args[0]}/get-${args[0]}/many
- * @description Get multiple ${args[0]}
+ * @description Get multiple ${args[0]}s
  * @access Public
  * @param {function} controller - ['getMany${capitalizedResourceName}']
  * @param {function} validation - ['validateSearchQueries']
@@ -177,23 +177,23 @@ export const create${capitalizedResourceName} = catchAsync(async (req: Request, 
   // Call the service method to create a new ${args[0]} and get the result
   const result = await ${resourceName}Services.create${capitalizedResourceName}(req.body);
   if (!result) throw new Error('Failed to create ${resourceName}');
-  // Send a success response with the created resource data
+  // Send a success response with the created ${resourceName} data
   ServerResponse(res, true, 201, '${capitalizedResourceName} created successfully', result);
 });
 
 /**
- * Controller function to handle the creation of multiple ${args[0]}.
+ * Controller function to handle the creation of multiple ${args[0]}s.
  *
  * @param {Request} req - The request object containing an array of ${args[0]} data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The created ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} creation fails.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The created ${resourceName}s.
+ * @throws {Error} - Throws an error if the ${resourceName}s creation fails.
  */
 export const createMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create multiple ${resourceName}s and get the result
   const result = await ${resourceName}Services.createMany${capitalizedResourceName}(req.body);
-  if (!result) throw new Error('Failed to create multiple ${resourceName}');
-  // Send a success response with the created resources data
+  if (!result) throw new Error('Failed to create multiple ${resourceName}s');
+  // Send a success response with the created ${args[0]}s data
   ServerResponse(res, true, 201, '${capitalizedResourceName}s created successfully', result);
 });
 
@@ -210,23 +210,23 @@ export const update${capitalizedResourceName} = catchAsync(async (req: Request, 
   // Call the service method to update the ${args[0]} by ID and get the result
   const result = await ${resourceName}Services.update${capitalizedResourceName}(id, req.body);
   if (!result) throw new Error('Failed to update ${resourceName}');
-  // Send a success response with the updated resource data
+  // Send a success response with the updated ${args[0]} data
   ServerResponse(res, true, 200, '${capitalizedResourceName} updated successfully', result);
 });
 
 /**
- * Controller function to handle the update operation for multiple ${args[0]}.
+ * Controller function to handle the update operation for multiple ${args[0]}s.
  *
  * @param {Request} req - The request object containing an array of ${args[0]} data in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The updated ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} update fails.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The updated ${resourceName}s.
+ * @throws {Error} - Throws an error if the ${resourceName}s update fails.
  */
 export const updateMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to update multiple ${args[0]} and get the result
+  // Call the service method to update multiple ${args[0]}s and get the result
   const result = await ${resourceName}Services.updateMany${capitalizedResourceName}(req.body);
-  if (!result.length) throw new Error('Failed to update multiple ${resourceName}');
-  // Send a success response with the updated resources data
+  if (!result.length) throw new Error('Failed to update multiple ${resourceName}s');
+  // Send a success response with the updated ${args[0]}s data
   ServerResponse(res, true, 200, '${capitalizedResourceName}s updated successfully', result);
 });
 
@@ -248,17 +248,17 @@ export const delete${capitalizedResourceName} = catchAsync(async (req: Request, 
 });
 
 /**
- * Controller function to handle the deletion of multiple ${args[0]}.
+ * Controller function to handle the deletion of multiple ${args[0]}s.
  *
  * @param {Request} req - The request object containing an array of IDs of ${args[0]} to delete in the body.
  * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The deleted ${resourceName}.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The deleted ${resourceName}s.
  * @throws {Error} - Throws an error if the ${resourceName} deletion fails.
  */
 export const deleteMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to delete multiple ${args[0]} and get the result
+  // Call the service method to delete multiple ${args[0]}s and get the result
   const result = await ${resourceName}Services.deleteMany${capitalizedResourceName}(req.body);
-  if (!result) throw new Error('Failed to delete multiple ${resourceName}');
+  if (!result) throw new Error('Failed to delete multiple ${resourceName}s');
   // Send a success response confirming the deletions
   ServerResponse(res, true, 200, '${capitalizedResourceName}s deleted successfully');
 });
@@ -275,26 +275,26 @@ export const get${capitalizedResourceName}ById = catchAsync(async (req: Request,
   const { id } = req.params;
   // Call the service method to get the ${args[0]} by ID and get the result
   const result = await ${resourceName}Services.get${capitalizedResourceName}ById(id);
-  if (!result) throw new Error('${resourceName} not found');
+  if (!result) throw new Error('${capitalizedResourceName} not found');
   // Send a success response with the retrieved resource data
   ServerResponse(res, true, 200, '${capitalizedResourceName} retrieved successfully', result);
 });
 
 /**
- * Controller function to handle the retrieval of multiple ${args[0]}.
+ * Controller function to handle the retrieval of multiple ${args[0]}s.
  *
  * @param {Request} req - The request object containing query parameters for filtering.
  * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The retrieved ${resourceName}.
- * @throws {Error} - Throws an error if the ${resourceName} retrieval fails.
+ * @returns {Promise<Partial<I${capitalizedResourceName}>[]>} - The retrieved ${resourceName}s.
+ * @throws {Error} - Throws an error if the ${resourceName}s retrieval fails.
  */
 export const getMany${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   // Type assertion for query parameters 
   const query = req.query as unknown as { searchKey?: string, showPerPage: number, pageNo: number };
-  // Call the service method to get multiple ${args[0]} based on query parameters and get the result
+  // Call the service method to get multiple ${args[0]}s based on query parameters and get the result
   const { ${resourceName}s, totalData, totalPages } = await ${resourceName}Services.getMany${capitalizedResourceName}(query);
-  if (!${resourceName}s) throw new Error('Failed to retrieve ${resourceName}');
-  // Send a success response with the retrieved resources data
+  if (!${resourceName}s) throw new Error('Failed to retrieve ${resourceName}s');
+  // Send a success response with the retrieved ${args[0]}s data
   ServerResponse(res, true, 200, '${capitalizedResourceName}s retrieved successfully', { ${resourceName}s, totalData, totalPages });
 });
     `;
