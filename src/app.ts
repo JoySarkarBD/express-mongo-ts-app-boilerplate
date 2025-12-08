@@ -1,4 +1,5 @@
 import express, { Application, Request, Response } from 'express';
+import fs from 'fs';
 import path from 'path';
 import config from './config/config';
 
@@ -58,7 +59,6 @@ app.use(
 export const routes: { module: string; path: string; method: string; time: number }[] = [];
 
 const loadRoutes = (basePath: string, baseRoute: string) => {
-  const fs = require('fs'); // Load fs only here
   if (fs.existsSync(basePath)) {
     fs.readdirSync(basePath).forEach((item: string) => {
       const itemPath = path.join(basePath, item);
