@@ -13,7 +13,7 @@ import ServerResponse from '../helpers/responses/custom-response';
  */
 const zodErrorHandler = (req: Request, res: Response, zodErr: ZodError): Response => {
   // Extract and format errors from the Zod error object
-  const errors = zodErr.errors.map((err) => ({
+  const errors = zodErr.issues.map((err) => ({
     field: err?.path?.join(', '),
     message: err?.message,
   }));

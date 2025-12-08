@@ -8,7 +8,7 @@ import zodErrorHandler from '../../handlers/zod-error-handler';
 const zodCreateUserSchema = z.object({
   // Define fields required for creating a new user.
   // Example:
-  // filedName: z.string({ required_error: 'Please provide a filedName.' }).min(1, "Can't be empty."),
+  // filedName: z.string({ message: 'Please provide a filedName.' }).min(1, "Can't be empty."),
 }).strict();
 
 /**
@@ -57,7 +57,7 @@ export const validateCreateManyUser = (req: Request, res: Response, next: NextFu
 const zodUpdateUserSchema = z.object({
   // Define fields required for updating an existing user.
   // Example:
-  // fieldName: z.string({ required_error: 'Please provide a filedName.' }).optional(), // Fields can be optional during updates
+  // fieldName: z.string({ message: 'Please provide a filedName.' }).optional(), // Fields can be optional during updates
 }).strict();
 
 /**

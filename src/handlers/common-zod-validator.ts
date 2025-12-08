@@ -10,8 +10,7 @@ const zodIdSchema = z
   .object({
     id: z
       .string({
-        required_error: 'Id is required',
-        invalid_type_error: 'Please provide a valid id',
+        message: 'Id is required',
       })
       .refine((id: string) => isMongoId(id), {
         message: 'Please provide a valid id',
@@ -75,15 +74,15 @@ export const validateIds = (req: Request, res: Response, next: NextFunction) => 
  */
 const zodRequestSearchQuerySchema = z
   .object({
-    searchKey: z.string({ required_error: 'Please specify the search key.' }).optional(),
+    searchKey: z.string({ message: 'Please specify the search key.' }).optional(),
     showPerPage: z
-      .string({ required_error: 'Please specify the number of items to show per page.' })
+      .string({ message: 'Please specify the number of items to show per page.' })
       .transform((val) => (val ? parseInt(val, 10) : undefined))
       .refine((val) => val !== undefined && val > 0, {
         message: 'Show per page must be a positive number.',
       }),
     pageNo: z
-      .string({ required_error: 'Please specify the page number.' })
+      .string({ message: 'Please specify the page number.' })
       .transform((val) => (val ? parseInt(val, 10) : undefined))
       .refine((val) => val !== undefined && val > 0, {
         message: 'Page number must be a positive number.',
