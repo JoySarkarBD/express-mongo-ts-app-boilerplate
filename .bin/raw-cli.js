@@ -761,7 +761,7 @@ export const ${resourceName}Services = {
         }
       })();
     });
-  program.parse(process.argv);
+  program.parse(['node', 'cli.js'].concat(args));
 } else {
   console.error(`Unknown command: ${command}`);
   process.exit(1);
