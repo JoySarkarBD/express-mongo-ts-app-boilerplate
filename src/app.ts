@@ -115,12 +115,7 @@ loadRoutes(routesPath, '/api/v1');
 
 // Serve an image file on the root route
 app.get('/', (req: Request, res: Response) => {
-  res.sendFile(path.join(publicDirPath, 'images', 'index.png'), (err) => {
-    if (err) {
-      console.error(`Failed to send image file: ${err.message}`);
-      res.status(500).send('Failed to send image.');
-    }
-  });
+  res.json({ message: 'Welcome to the Express MongoDB TypeScript Boilerplate API' });
 });
 
 // Path not found handler

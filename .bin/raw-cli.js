@@ -79,8 +79,8 @@ const router = Router();
  * @route POST /api/v1/${args[0]}/create-${args[0]}
  * @description Create a new ${args[0]}
  * @access Public
- * @param {function} controller - ['create${capitalizedResourceName}']
  * @param {function} validation - ['validateCreate${capitalizedResourceName}']
+ * @param {function} controller - ['create${capitalizedResourceName}']
  */
 router.post("/create-${args[0]}", validateCreate${capitalizedResourceName}, create${capitalizedResourceName});
 
@@ -88,8 +88,8 @@ router.post("/create-${args[0]}", validateCreate${capitalizedResourceName}, crea
  * @route POST /api/v1/${args[0]}/create-${args[0]}/many
  * @description Create multiple ${args[0]}s
  * @access Public
- * @param {function} controller - ['createMany${capitalizedResourceName}']
  * @param {function} validation - ['validateCreateMany${capitalizedResourceName}']
+ * @param {function} controller - ['createMany${capitalizedResourceName}']
  */
 router.post("/create-${args[0]}/many", validateCreateMany${capitalizedResourceName}, createMany${capitalizedResourceName});
 
@@ -97,8 +97,8 @@ router.post("/create-${args[0]}/many", validateCreateMany${capitalizedResourceNa
  * @route PATCH /api/v1/${args[0]}/update-${args[0]}/many
  * @description Update multiple ${args[0]}s information
  * @access Public
- * @param {function} controller - ['updateMany${capitalizedResourceName}']
  * @param {function} validation - ['validateIds', 'validateUpdateMany${capitalizedResourceName}']
+ * @param {function} controller - ['updateMany${capitalizedResourceName}']
  */
 router.patch("/update-${args[0]}/many", validateIds, validateUpdateMany${capitalizedResourceName}, updateMany${capitalizedResourceName});
 
@@ -107,8 +107,8 @@ router.patch("/update-${args[0]}/many", validateIds, validateUpdateMany${capital
  * @description Update ${args[0]} information
  * @param {string} id - The ID of the ${args[0]} to update
  * @access Public
- * @param {function} controller - ['update${capitalizedResourceName}']
  * @param {function} validation - ['validateId', 'validateUpdate${capitalizedResourceName}']
+ * @param {function} controller - ['update${capitalizedResourceName}']
  */
 router.patch("/update-${args[0]}/:id", validateId, validateUpdate${capitalizedResourceName}, update${capitalizedResourceName});
 
@@ -116,8 +116,8 @@ router.patch("/update-${args[0]}/:id", validateId, validateUpdate${capitalizedRe
  * @route DELETE /api/v1/${args[0]}/delete-${args[0]}/many
  * @description Delete multiple ${args[0]}s
  * @access Public
- * @param {function} controller - ['deleteMany${capitalizedResourceName}']
  * @param {function} validation - ['validateIds']
+ * @param {function} controller - ['deleteMany${capitalizedResourceName}']
  */
 router.delete("/delete-${args[0]}/many", validateIds, deleteMany${capitalizedResourceName});
 
@@ -126,8 +126,8 @@ router.delete("/delete-${args[0]}/many", validateIds, deleteMany${capitalizedRes
  * @description Delete a ${args[0]}
  * @param {string} id - The ID of the ${args[0]} to delete
  * @access Public
- * @param {function} controller - ['delete${capitalizedResourceName}']
  * @param {function} validation - ['validateId']
+ * @param {function} controller - ['delete${capitalizedResourceName}']
  */
 router.delete("/delete-${args[0]}/:id", validateId, delete${capitalizedResourceName});
 
@@ -135,8 +135,8 @@ router.delete("/delete-${args[0]}/:id", validateId, delete${capitalizedResourceN
  * @route GET /api/v1/${args[0]}/get-${args[0]}/many
  * @description Get multiple ${args[0]}s
  * @access Public
- * @param {function} controller - ['getMany${capitalizedResourceName}']
  * @param {function} validation - ['validateSearchQueries']
+ * @param {function} controller - ['getMany${capitalizedResourceName}']
  */
 router.get("/get-${args[0]}/many", validateSearchQueries, getMany${capitalizedResourceName});
 
@@ -145,8 +145,8 @@ router.get("/get-${args[0]}/many", validateSearchQueries, getMany${capitalizedRe
  * @description Get a ${args[0]} by ID
  * @param {string} id - The ID of the ${args[0]} to retrieve
  * @access Public
- * @param {function} controller - ['get${capitalizedResourceName}ById']
  * @param {function} validation - ['validateId']
+ * @param {function} controller - ['get${capitalizedResourceName}ById']
  */
 router.get("/get-${args[0]}/:id", validateId, get${capitalizedResourceName}ById);
 
@@ -208,7 +208,7 @@ export const createMany${capitalizedResourceName} = catchAsync(async (req: Reque
 export const update${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to update the ${args[0]} by ID and get the result
-  const result = await ${resourceName}Services.update${capitalizedResourceName}(id, req.body);
+  const result = await ${resourceName}Services.update${capitalizedResourceName}(id as string, req.body);
   if (!result) throw new Error('Failed to update ${resourceName}');
   // Send a success response with the updated ${args[0]} data
   ServerResponse(res, true, 200, '${capitalizedResourceName} updated successfully', result);
@@ -241,7 +241,7 @@ export const updateMany${capitalizedResourceName} = catchAsync(async (req: Reque
 export const delete${capitalizedResourceName} = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to delete the ${args[0]} by ID
-  const result = await ${resourceName}Services.delete${capitalizedResourceName}(id);
+  const result = await ${resourceName}Services.delete${capitalizedResourceName}(id as string);
   if (!result) throw new Error('Failed to delete ${resourceName}');
   // Send a success response confirming the deletion
   ServerResponse(res, true, 200, '${capitalizedResourceName} deleted successfully');
@@ -274,7 +274,7 @@ export const deleteMany${capitalizedResourceName} = catchAsync(async (req: Reque
 export const get${capitalizedResourceName}ById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   // Call the service method to get the ${args[0]} by ID and get the result
-  const result = await ${resourceName}Services.get${capitalizedResourceName}ById(id);
+  const result = await ${resourceName}Services.get${capitalizedResourceName}ById(id as string);
   if (!result) throw new Error('${capitalizedResourceName} not found');
   // Send a success response with the retrieved resource data
   ServerResponse(res, true, 200, '${capitalizedResourceName} retrieved successfully', result);
@@ -358,108 +358,81 @@ export default ${capitalizedResourceName};
       const validationDir = path.join(__dirname, '..', 'src', 'modules', args[0]);
       // Create Zod validation schema content
       const validationContent = `
-import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
-import zodErrorHandler from '../../handlers/zod-error-handler';
+import { validate } from '../../handlers/zod-error-handler';
 
 /**
- * Zod schema for validating ${resourceName} data during creation.
+ * ${capitalizedResourceName} Validation Schemas and Types
+ *
+ * This module defines Zod schemas for validating ${resourceName}-related
+ * requests such as creation (single + bulk) and updates (single + bulk).
+ * It also exports corresponding TypeScript types inferred from these schemas.
+ * Each schema includes detailed validation rules and custom error messages
+ * to ensure data integrity and provide clear feedback to API consumers.
+ *
+ * Named validator middleware functions are exported for direct use in Express routes.
  */
-const zodCreate${capitalizedResourceName}Schema = z.object({
-  // Define fields required for creating a new ${resourceName}.
-  // Example:
-  // filedName: z.string({ message: 'Please provide a filedName.' }).min(1, "Can't be empty."),
-}).strict();
 
 /**
- * Middleware function to validate ${resourceName} creation data using Zod schema.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
- * @param {NextFunction} next - The next middleware function.
- * @returns {void}
+ * Zod schema for validating data when **creating** a single ${resourceName}.
+ * 
+ * → Add all **required** fields here
  */
-export const validateCreate${capitalizedResourceName} = (req: Request, res: Response, next: NextFunction) => {
-  // Validate the request body for creating a new ${resourceName}
-  const parseResult = zodCreate${capitalizedResourceName}Schema.safeParse(req.body);
+const zodCreate${capitalizedResourceName}Schema = z
+  .object({
+    // Example fields — replace / expand as needed:
+    // name: z.string({ message: '${capitalizedResourceName} name is required' }).min(2, 'Name must be at least 2 characters').max(100),
+    // email: z.string().email({ message: 'Invalid email format' }),
+    // age: z.number().int().positive().optional(),
+    // status: z.enum(['active', 'inactive', 'pending']).default('pending'),
+  })
+  .strict();
 
-  // If validation fails, send an error response using the Zod error handler
-  if (!parseResult.success) {
-    return zodErrorHandler(req, res, parseResult.error);
-  }
-
-  // If validation passes, proceed to the next middleware function
-  return next();
-};
+export type Create${capitalizedResourceName}Input = z.infer<typeof zodCreate${capitalizedResourceName}Schema>;
 
 /**
- * Zod schema for validating multiple ${resourceName} data during creation.
+ * Zod schema for validating **bulk creation** (array of ${resourceName} objects).
  */
-const zodCreateMany${capitalizedResourceName}Schema = z.array(zodCreate${capitalizedResourceName}Schema);
+const zodCreateMany${capitalizedResourceName}Schema = z
+  .array(zodCreate${capitalizedResourceName}Schema)
+  .min(1, { message: 'At least one ${resourceName} must be provided for bulk creation' });
+
+export type CreateMany${capitalizedResourceName}Input = z.infer<typeof zodCreateMany${capitalizedResourceName}Schema>;
 
 /**
- * Middleware function to validate multiple ${resourceName} creation data using Zod schema.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
- * @param {NextFunction} next - The next middleware function.
- * @returns {void}
+ * Zod schema for validating data when **updating** an existing ${resourceName}.
+ * 
+ * → All fields should usually be .optional()
  */
-export const validateCreateMany${capitalizedResourceName} = (req: Request, res: Response, next: NextFunction) => {
-  const parseResult = zodCreateMany${capitalizedResourceName}Schema.safeParse(req.body);
-  if (!parseResult.success) {
-    return zodErrorHandler(req, res, parseResult.error);
-  }
-  return next();
-};
+const zodUpdate${capitalizedResourceName}Schema = z
+  .object({
+    // Example fields — replace / expand as needed:
+    // name: z.string().min(2, 'Name must be at least 2 characters').max(100).optional(),
+    // email: z.string().email({ message: 'Invalid email format' }).optional(),
+    // age: z.number().int().positive().optional(),
+    // status: z.enum(['active', 'inactive', 'pending']).optional(),
+  })
+  .strict();
+
+export type Update${capitalizedResourceName}Input = z.infer<typeof zodUpdate${capitalizedResourceName}Schema>;
 
 /**
- * Zod schema for validating ${resourceName} data during updates.
+ * Zod schema for validating **bulk updates** (array of partial ${resourceName} objects).
  */
-const zodUpdate${capitalizedResourceName}Schema = z.object({
-  // Define fields required for updating an existing ${resourceName}.
-  // Example:
-  // fieldName: z.string({ message: 'Please provide a filedName.' }).optional(), // Fields can be optional during updates
-}).strict();
+const zodUpdateMany${capitalizedResourceName}Schema = z
+  .array(zodUpdate${capitalizedResourceName}Schema)
+  .min(1, { message: 'At least one ${resourceName} update object must be provided' });
+
+export type UpdateMany${capitalizedResourceName}Input = z.infer<typeof zodUpdateMany${capitalizedResourceName}Schema>;
 
 /**
- * Middleware function to validate ${resourceName} update data using Zod schema.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
- * @param {NextFunction} next - The next middleware function.
- * @returns {void}
+ * Named validators — use these directly in your Express routes
  */
-export const validateUpdate${capitalizedResourceName} = (req: Request, res: Response, next: NextFunction) => {
-  // Validate the request body for updating an existing ${resourceName}
-  const parseResult = zodUpdate${capitalizedResourceName}Schema.safeParse(req.body);
+export const validateCreate${capitalizedResourceName} = validate(zodCreate${capitalizedResourceName}Schema);
+export const validateCreateMany${capitalizedResourceName} = validate(zodCreateMany${capitalizedResourceName}Schema);
 
-  // If validation fails, send an error response using the Zod error handler
-  if (!parseResult.success) {
-    return zodErrorHandler(req, res, parseResult.error);
-  }
-
-  // If validation passes, proceed to the next middleware function
-  return next();
-};
-
-/**
- * Zod schema for validating multiple ${resourceName} data during updates.
- */
-const zodUpdateMany${capitalizedResourceName}Schema = z.array(zodUpdate${capitalizedResourceName}Schema);
-
-
-/**
- * Middleware function to validate multiple ${resourceName} update data using Zod schema.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
- * @param {NextFunction} next - The next middleware function.
- * @returns {void}
- */
-export const validateUpdateMany${capitalizedResourceName} = (req: Request, res: Response, next: NextFunction) => {
-  const parseResult = zodUpdateMany${capitalizedResourceName}Schema.safeParse(req.body);
-  if (!parseResult.success) {
-    return zodErrorHandler(req, res, parseResult.error);
-  }
-  return next();
-};
+export const validateUpdate${capitalizedResourceName} = validate(zodUpdate${capitalizedResourceName}Schema);
+export const validateUpdateMany${capitalizedResourceName} = validate(zodUpdateMany${capitalizedResourceName}Schema);
     `;
       // Path to the zod validation file
       const validationFilePath = path.join(validationDir, `${args[0]}.validation.ts`);

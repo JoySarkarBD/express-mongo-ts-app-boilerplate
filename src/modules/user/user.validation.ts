@@ -1,102 +1,75 @@
-import { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
-import zodErrorHandler from '../../handlers/zod-error-handler';
+import { validate } from '../../handlers/zod-error-handler';
 
 /**
- * Zod schema for validating user data during creation.
+ * User Validation Schemas and Types
+ *
+ * This module defines Zod schemas for validating user-related
+ * requests such as creation (single + bulk) and updates (single + bulk).
+ * It also exports corresponding TypeScript types inferred from these schemas.
+ * Each schema includes detailed validation rules and custom error messages
+ * to ensure data integrity and provide clear feedback to API consumers.
+ *
+ * Named validator middleware functions are exported for direct use in Express routes.
  */
-const zodCreateUserSchema = z.object({
-  // Define fields required for creating a new user.
-  // Example:
-  // filedName: z.string({ message: 'Please provide a filedName.' }).min(1, "Can't be empty."),
-}).strict();
 
 /**
- * Middleware function to validate user creation data using Zod schema.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
- * @param {NextFunction} next - The next middleware function.
- * @returns {void}
+ * Zod schema for validating data when **creating** a single user.
+ * 
+ * → Add all **required** fields here
  */
-export const validateCreateUser = (req: Request, res: Response, next: NextFunction) => {
-  // Validate the request body for creating a new user
-  const parseResult = zodCreateUserSchema.safeParse(req.body);
+const zodCreateUserSchema = z
+  .object({
+    // Example fields — replace / expand as needed:
+    // name: z.string({ message: 'User name is required' }).min(2, 'Name must be at least 2 characters').max(100),
+    // email: z.string().email({ message: 'Invalid email format' }),
+    // age: z.number().int().positive().optional(),
+    // status: z.enum(['active', 'inactive', 'pending']).default('pending'),
+  })
+  .strict();
 
-  // If validation fails, send an error response using the Zod error handler
-  if (!parseResult.success) {
-    return zodErrorHandler(req, res, parseResult.error);
-  }
-
-  // If validation passes, proceed to the next middleware function
-  return next();
-};
+export type CreateUserInput = z.infer<typeof zodCreateUserSchema>;
 
 /**
- * Zod schema for validating multiple user data during creation.
+ * Zod schema for validating **bulk creation** (array of user objects).
  */
-const zodCreateManyUserSchema = z.array(zodCreateUserSchema);
+const zodCreateManyUserSchema = z
+  .array(zodCreateUserSchema)
+  .min(1, { message: 'At least one user must be provided for bulk creation' });
+
+export type CreateManyUserInput = z.infer<typeof zodCreateManyUserSchema>;
 
 /**
- * Middleware function to validate multiple user creation data using Zod schema.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
- * @param {NextFunction} next - The next middleware function.
- * @returns {void}
+ * Zod schema for validating data when **updating** an existing user.
+ * 
+ * → All fields should usually be .optional()
  */
-export const validateCreateManyUser = (req: Request, res: Response, next: NextFunction) => {
-  const parseResult = zodCreateManyUserSchema.safeParse(req.body);
-  if (!parseResult.success) {
-    return zodErrorHandler(req, res, parseResult.error);
-  }
-  return next();
-};
+const zodUpdateUserSchema = z
+  .object({
+    // Example fields — replace / expand as needed:
+    // name: z.string().min(2, 'Name must be at least 2 characters').max(100).optional(),
+    // email: z.string().email({ message: 'Invalid email format' }).optional(),
+    // age: z.number().int().positive().optional(),
+    // status: z.enum(['active', 'inactive', 'pending']).optional(),
+  })
+  .strict();
+
+export type UpdateUserInput = z.infer<typeof zodUpdateUserSchema>;
 
 /**
- * Zod schema for validating user data during updates.
+ * Zod schema for validating **bulk updates** (array of partial user objects).
  */
-const zodUpdateUserSchema = z.object({
-  // Define fields required for updating an existing user.
-  // Example:
-  // fieldName: z.string({ message: 'Please provide a filedName.' }).optional(), // Fields can be optional during updates
-}).strict();
+const zodUpdateManyUserSchema = z
+  .array(zodUpdateUserSchema)
+  .min(1, { message: 'At least one user update object must be provided' });
+
+export type UpdateManyUserInput = z.infer<typeof zodUpdateManyUserSchema>;
 
 /**
- * Middleware function to validate user update data using Zod schema.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
- * @param {NextFunction} next - The next middleware function.
- * @returns {void}
+ * Named validators — use these directly in your Express routes
  */
-export const validateUpdateUser = (req: Request, res: Response, next: NextFunction) => {
-  // Validate the request body for updating an existing user
-  const parseResult = zodUpdateUserSchema.safeParse(req.body);
+export const validateCreateUser = validate(zodCreateUserSchema);
+export const validateCreateManyUser = validate(zodCreateManyUserSchema);
 
-  // If validation fails, send an error response using the Zod error handler
-  if (!parseResult.success) {
-    return zodErrorHandler(req, res, parseResult.error);
-  }
-
-  // If validation passes, proceed to the next middleware function
-  return next();
-};
-
-/**
- * Zod schema for validating multiple user data during updates.
- */
-const zodUpdateManyUserSchema = z.array(zodUpdateUserSchema);
-
-
-/**
- * Middleware function to validate multiple user update data using Zod schema.
- * @param {Request} req - The request object.
- * @param {Response} res - The response object.
- * @param {NextFunction} next - The next middleware function.
- * @returns {void}
- */
-export const validateUpdateManyUser = (req: Request, res: Response, next: NextFunction) => {
-  const parseResult = zodUpdateManyUserSchema.safeParse(req.body);
-  if (!parseResult.success) {
-    return zodErrorHandler(req, res, parseResult.error);
-  }
-  return next();
-};
+export const validateUpdateUser = validate(zodUpdateUserSchema);
+export const validateUpdateManyUser = validate(zodUpdateManyUserSchema);
