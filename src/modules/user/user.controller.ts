@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { userServices } from './user.service';
+import { SearchQueryInput } from '../../handlers/common-zod-validator';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
 
@@ -128,7 +129,7 @@ export const getUserById = catchAsync(async (req: Request, res: Response) => {
  */
 export const getManyUser = catchAsync(async (req: Request, res: Response) => {
   // Type assertion for query parameters 
-  const query = req.query as unknown as { searchKey?: string, showPerPage: number, pageNo: number };
+  const query = req.query as SearchQueryInput;
   // Call the service method to get multiple users based on query parameters and get the result
   const { users, totalData, totalPages } = await userServices.getManyUser(query);
   if (!users) throw new Error('Failed to retrieve users');

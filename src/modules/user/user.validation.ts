@@ -1,3 +1,4 @@
+import { isMongoId } from 'validator';
 import { z } from 'zod';
 import { validate } from '../../handlers/zod-error-handler';
 
@@ -57,10 +58,21 @@ const zodUpdateUserSchema = z
 export type UpdateUserInput = z.infer<typeof zodUpdateUserSchema>;
 
 /**
- * Zod schema for validating **bulk updates** (array of partial user objects).
+ * Zod schema for validating bulk updates (array of partial user objects).
+ */
+const zodUpdateManyUserForBulkSchema = zodUpdateUserSchema
+  .extend({
+    id: z.string().refine(isMongoId, { message: 'Please provide a valid MongoDB ObjectId' }),
+  })
+  .refine((data) => Object.keys(data).length > 1, {
+    message: 'At least one field to update must be provided',
+  });
+
+/**
+ * Zod schema for validating an array of multiple user updates.
  */
 const zodUpdateManyUserSchema = z
-  .array(zodUpdateUserSchema)
+  .array(zodUpdateManyUserForBulkSchema)
   .min(1, { message: 'At least one user update object must be provided' });
 
 export type UpdateManyUserInput = z.infer<typeof zodUpdateManyUserSchema>;
@@ -70,6 +82,5 @@ export type UpdateManyUserInput = z.infer<typeof zodUpdateManyUserSchema>;
  */
 export const validateCreateUser = validate(zodCreateUserSchema);
 export const validateCreateManyUser = validate(zodCreateManyUserSchema);
-
 export const validateUpdateUser = validate(zodUpdateUserSchema);
 export const validateUpdateManyUser = validate(zodUpdateManyUserSchema);
