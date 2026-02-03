@@ -1,6 +1,6 @@
 import { isMongoId } from 'validator';
 import { z } from 'zod';
-import { validate } from '../../handlers/zod-error-handler';
+import { validateBody } from '../../handlers/zod-error-handler';
 
 /**
  * User Validation Schemas and Types
@@ -80,7 +80,7 @@ export type UpdateManyUserInput = z.infer<typeof zodUpdateManyUserSchema>;
 /**
  * Named validators — use these directly in your Express routes
  */
-export const validateCreateUser = validate(zodCreateUserSchema);
-export const validateCreateManyUser = validate(zodCreateManyUserSchema);
-export const validateUpdateUser = validate(zodUpdateUserSchema);
-export const validateUpdateManyUser = validate(zodUpdateManyUserSchema);
+export const validateCreateUser = validateBody(zodCreateUserSchema);
+export const validateCreateManyUser = validateBody(zodCreateManyUserSchema);
+export const validateUpdateUser = validateBody(zodUpdateUserSchema);
+export const validateUpdateManyUser = validateBody(zodUpdateManyUserSchema);
