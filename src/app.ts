@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from 'express';
+import express, { Application } from 'express';
 import fs from 'fs';
 import path from 'path';
 import config from './config/config';
@@ -11,8 +11,17 @@ import mongoSanitize from 'express-mongo-sanitize';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import hpp from 'hpp';
+import mongoose from 'mongoose';
 import morgan from 'morgan';
+import PathNotFound from './helpers/responses/path-not-found';
 import { loggerStream } from './utils/logger/logger';
+
+// Terminal colors
+const GREEN = '\x1b[32m';
+const BLUE = '\x1b[34m';
+const YELLOW = '\x1b[33m';
+const WHITE = '\x1b[37m';
+const RESET = '\x1b[0m';
 
 // Express app initialization
 const app: Application = express();
@@ -22,6 +31,7 @@ const publicDirPath = path.join(__dirname, '..', 'public');
 
 // Middleware setup
 app.use(express.json({ limit: config.MAX_JSON_SIZE }));
+
 app.use(express.urlencoded({ extended: config.URL_ENCODED }));
 app.use(cookieParser());
 app.use(fileUpload(config.EXPRESS_FILE_UPLOAD_CONFIG));
@@ -74,12 +84,18 @@ app.use(
 );
 
 // Recursive function to load routes from nested folders
-export const routes: { module: string; path: string; method: string; time: number }[] = [];
+const routes: {
+  module: string;
+  path: string;
+  method: string;
+  time: number;
+}[] = [];
 
 const loadRoutes = (basePath: string, baseRoute: string) => {
   if (fs.existsSync(basePath)) {
     fs.readdirSync(basePath).forEach((item: string) => {
       const itemPath = path.join(basePath, item);
+
       const routePrefix = `${baseRoute}/${item.replace('.route', '')}`;
 
       const start = performance.now();
@@ -113,13 +129,59 @@ const loadRoutes = (basePath: string, baseRoute: string) => {
 const routesPath = path.join(__dirname, 'modules');
 loadRoutes(routesPath, '/api/v1');
 
-// Serve an image file on the root route
-app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Welcome to the Express MongoDB TypeScript Boilerplate API' });
-});
-
 // Path not found handler
-import PathNotFound from './helpers/responses/path-not-found';
 app.use(PathNotFound);
 
-export default app;
+// Helper: formatted date
+const getFormattedDate = () => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+};
+
+// Helper: formatted time
+const getFormattedTime = () => {
+  const now = new Date();
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+};
+
+// ────────────────────────────────────────────────
+// Log routes grouped by module
+// ────────────────────────────────────────────────
+function logRoutesByModule() {
+  const grouped: Record<string, any[]> = {};
+
+  routes.forEach((route) => {
+    if (!grouped[route.module]) grouped[route.module] = [];
+    grouped[route.module].push(route);
+  });
+
+  Object.entries(grouped).forEach(([module, routeList]) => {
+    console.log(
+      `${YELLOW}======================= ${module.toUpperCase()} =======================${RESET}\n`
+    );
+
+    routeList.forEach((route: any) => {
+      const info = `${GREEN}${route.method} ${route.path} - ${YELLOW}${route.time.toFixed(2)} ms${RESET}`;
+      console.log(
+        `${GREEN}[Express] ${WHITE}${getFormattedDate()} ${getFormattedTime()} ${GREEN}LOG ${YELLOW}[RouterExplorer] ${info}${RESET}`
+      );
+    });
+
+    console.log(`\n${YELLOW}======================== END ========================${RESET}\n`);
+  });
+}
+
+app.listen(config.PORT, async () => {
+  // Connect to MongoDB
+  await mongoose.connect(config.DB_CONNECTION_URI);
+  console.log(
+    `${GREEN}✔${RESET} ${WHITE}Connected to MongoDB successfully.${RESET}\n`,
+    `${GREEN}✔${RESET} ${WHITE}Connected to Redis successfully.${RESET}\n`,
+    `${BLUE}🚀  Server Details:${RESET}\n`,
+    `Base URL: ${YELLOW}${config.BASE_URL}:${config.PORT}${RESET}\n`,
+    `Environment: ${YELLOW}${config.NODE_ENV}${RESET}\n`,
+    `Port: ${YELLOW}${config.PORT}${RESET}\n`
+  );
+  console.log(`Server is running at ${config.BASE_URL}:${config.PORT} in ${config.NODE_ENV} mode.`);
+  logRoutesByModule();
+});
