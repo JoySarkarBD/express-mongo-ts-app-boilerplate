@@ -71,11 +71,11 @@ export function validate<T extends z.ZodTypeAny>(
         req.params = result.data as any; // careful with types if needed
         break;
       case 'query':
-        req.query = result.data as any;
+        (req as any).validatedQuery = result.data;
         break;
+      // For mixed, you usually want to spread into req
       case 'mixed':
-        // For mixed, you usually want to spread into req
-        Object.assign(req, { validated: result.data });
+        (req as any).validated = result.data;
         break;
     }
 
