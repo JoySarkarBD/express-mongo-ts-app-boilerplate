@@ -7,7 +7,7 @@ export interface IUser extends Document {
   // fieldName: fieldType;
 }
 
-// Define the User schema
+// Define the user schema
 const UserSchema: Schema<IUser> = new Schema({
   // Define schema fields here
   // Example fields (replace with actual schema)
@@ -21,8 +21,8 @@ const UserSchema: Schema<IUser> = new Schema({
  versionKey: false,
 });
 
-// Create the User model
+// Create the user model
 const User = mongoose.model<IUser>('User', UserSchema);
 
-// Export the User model
+// Export the user model
 export default User;

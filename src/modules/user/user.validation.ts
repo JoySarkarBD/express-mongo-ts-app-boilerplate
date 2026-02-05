@@ -22,7 +22,7 @@ import { validateBody } from '../../handlers/zod-error-handler';
 const zodCreateUserSchema = z
   .object({
     // Example fields — replace / expand as needed:
-    // name: z.string({ message: 'Name is required' }).min(2, 'Name must be at least 2 characters').max(100),
+    // name: z.string({ message: 'User name is required' }).min(2, 'Name must be at least 2 characters').max(100),
     // email: z.string().email({ message: 'Invalid email format' }),
     // age: z.number().int().positive().optional(),
     // status: z.enum(['active', 'inactive', 'pending']).default('pending'),

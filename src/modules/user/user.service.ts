@@ -22,10 +22,10 @@ const createUser = async (data: CreateUserInput): Promise<Partial<IUser>> => {
 };
 
 /**
- * Service function to create multiple users.
+ * Service function to create multiple user.
  *
- * @param {CreateManyUserInput} data - An array of data to create multiple users.
- * @returns {Promise<Partial<IUser>[]>} - The created users.
+ * @param {CreateManyUserInput} data - An array of data to create multiple user.
+ * @returns {Promise<Partial<IUser>[]>} - The created user.
  */
 const createManyUser = async (data: CreateManyUserInput): Promise<Partial<IUser>[]> => {
   const createdUser = await UserModel.insertMany(data);
@@ -55,10 +55,10 @@ const updateUser = async (id: IdOrIdsInput['id'], data: UpdateUserInput): Promis
 };
 
 /**
- * Service function to update multiple users.
+ * Service function to update multiple user.
  *
- * @param {UpdateManyUserInput} data - An array of data to update multiple users.
- * @returns {Promise<Partial<IUser>[]>} - The updated users.
+ * @param {UpdateManyUserInput} data - An array of data to update multiple user.
+ * @returns {Promise<Partial<IUser>[]>} - The updated user.
  */
 const updateManyUser = async (data: UpdateManyUserInput): Promise<Partial<IUser>[]> => {
 // Early return if no data provided
@@ -122,14 +122,14 @@ const deleteUser = async (id: IdOrIdsInput['id']): Promise<Partial<IUser | null>
 };
 
 /**
- * Service function to delete multiple users.
+ * Service function to delete multiple user.
  *
- * @param {IdOrIdsInput['ids']} ids - An array of IDs of users to delete.
- * @returns {Promise<Partial<IUser>[]>} - The deleted users.
+ * @param {IdOrIdsInput['ids']} ids - An array of IDs of user to delete.
+ * @returns {Promise<Partial<IUser>[]>} - The deleted user.
  */
 const deleteManyUser = async (ids: IdOrIdsInput['ids']): Promise<Partial<IUser>[]> => {
   const userToDelete = await UserModel.find({ _id: { $in: ids } });
-  if (!userToDelete.length) throw new Error('No User found to delete');
+  if (!userToDelete.length) throw new Error('No user found to delete');
   await UserModel.deleteMany({ _id: { $in: ids } });
   return userToDelete; 
 };
@@ -149,7 +149,7 @@ const getUserById = async (id: IdOrIdsInput['id']): Promise<Partial<IUser | null
  * Service function to retrieve multiple user based on query parameters.
  *
  * @param {SearchQueryInput} query - The query parameters for filtering user.
- * @returns {Promise<Partial<IUser>[]>} - The retrieved users.
+ * @returns {Promise<Partial<IUser>[]>} - The retrieved user
  */
 const getManyUser = async (query: SearchQueryInput): Promise<{ users: Partial<IUser>[]; totalData: number; totalPages: number }> => {
   const { searchKey = '', showPerPage = 10, pageNo = 1 } = query;
@@ -162,7 +162,7 @@ const getManyUser = async (query: SearchQueryInput): Promise<{ users: Partial<IU
   };
   // Calculate the number of items to skip based on the page number
   const skipItems = (pageNo - 1) * showPerPage;
-  // Find the total count of matching users
+  // Find the total count of matching user
   const totalData = await UserModel.countDocuments(searchFilter);
   // Calculate the total number of pages
   const totalPages = Math.ceil(totalData / showPerPage);

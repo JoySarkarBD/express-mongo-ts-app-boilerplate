@@ -40,23 +40,23 @@ router.post("/create-user", validateCreateUser, createUser);
 router.post("/create-user/many", validateCreateManyUser, createManyUser);
 
 /**
- * @route PATCH /api/v1/user/update-user/many
+ * @route PUT /api/v1/user/update-user/many
  * @description Update multiple users information
  * @access Public
  * @param {function} validation - ['validateIds', 'validateUpdateManyUser']
  * @param {function} controller - ['updateManyUser']
  */
-router.patch("/update-user/many", validateIds, validateUpdateManyUser, updateManyUser);
+router.put("/update-user/many", validateIds, validateUpdateManyUser, updateManyUser);
 
 /**
- * @route PATCH /api/v1/user/update-user/:id
+ * @route PUT /api/v1/user/update-user/:id
  * @description Update user information
  * @access Public
  * @param {IdOrIdsInput['id']} id - The ID of the user to update
  * @param {function} validation - ['validateId', 'validateUpdateUser']
  * @param {function} controller - ['updateUser']
  */
-router.patch("/update-user/:id", validateId, validateUpdateUser, updateUser);
+router.put("/update-user/:id", validateId, validateUpdateUser, updateUser);
 
 /**
  * @route DELETE /api/v1/user/delete-user/many
