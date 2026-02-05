@@ -1,5 +1,5 @@
 /**
- * Type definition for User.
+ * Type definition for user.
  *
  * This type defines the structure of a single user object.
  * @interface TUser

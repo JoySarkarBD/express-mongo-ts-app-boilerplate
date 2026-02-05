@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
-// Define and export an interface representing a User document
+// Define and export an interface representing a user document
 export interface IUser extends Document {
   // Define the schema fields with their types
   // Example fields (replace with actual fields)

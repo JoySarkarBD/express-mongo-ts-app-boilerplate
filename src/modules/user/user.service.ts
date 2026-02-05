@@ -22,10 +22,10 @@ const createUser = async (data: CreateUserInput): Promise<Partial<IUser>> => {
 };
 
 /**
- * Service function to create multiple user.
+ * Service function to create multiple users.
  *
- * @param {CreateManyUserInput} data - An array of data to create multiple user.
- * @returns {Promise<Partial<IUser>[]>} - The created user.
+ * @param {CreateManyUserInput} data - An array of data to create multiple users.
+ * @returns {Promise<Partial<IUser>[]>} - The created users.
  */
 const createManyUser = async (data: CreateManyUserInput): Promise<Partial<IUser>[]> => {
   const createdUser = await UserModel.insertMany(data);
@@ -40,15 +40,25 @@ const createManyUser = async (data: CreateManyUserInput): Promise<Partial<IUser>
  * @returns {Promise<Partial<IUser>>} - The updated user.
  */
 const updateUser = async (id: IdOrIdsInput['id'], data: UpdateUserInput): Promise<Partial<IUser | null>> => {
+  // Check for duplicate (filed) combination
+  const existingUser = await UserModel.findOne({
+    _id: { $ne: id }, // Exclude the current document
+    $or: [{ /* filedName: data.filedName, */ }],
+  }).lean();
+  // Prevent duplicate updates
+  if (existingUser) {
+    throw new Error('Duplicate detected: Another user with the same fieldName already exists.');
+  }
+  // Proceed to update the user
   const updatedUser = await UserModel.findByIdAndUpdate(id, data, { new: true });
   return updatedUser;
 };
 
 /**
- * Service function to update multiple user.
+ * Service function to update multiple users.
  *
- * @param {UpdateManyUserInput} data - An array of data to update multiple user.
- * @returns {Promise<Partial<IUser>[]>} - The updated user.
+ * @param {UpdateManyUserInput} data - An array of data to update multiple users.
+ * @returns {Promise<Partial<IUser>[]>} - The updated users.
  */
 const updateManyUser = async (data: UpdateManyUserInput): Promise<Partial<IUser>[]> => {
 // Early return if no data provided
@@ -57,11 +67,11 @@ const updateManyUser = async (data: UpdateManyUserInput): Promise<Partial<IUser>
   }
   // Convert string ids to ObjectId (for safety)
   const objectIds = data.map((item) => new mongoose.Types.ObjectId(item.id));
-  // Check for duplicates (name or durationInDays) excluding the documents being updated
+  // Check for duplicates (filedName) excluding the documents being updated
   const existingUser = await UserModel.find({
     _id: { $nin: objectIds }, // Exclude documents being updated
     $or: data.flatMap((item) => [
-      // { filedName: item.filedName, $options: 'i' }, // case insensitive
+      // { filedName: item.filedName },
     ]),
   }).lean();
   // If any duplicates found, throw error
@@ -112,14 +122,14 @@ const deleteUser = async (id: IdOrIdsInput['id']): Promise<Partial<IUser | null>
 };
 
 /**
- * Service function to delete multiple user.
+ * Service function to delete multiple users.
  *
- * @param {IdOrIdsInput['ids']} ids - An array of IDs of user to delete.
- * @returns {Promise<Partial<IUser>[]>} - The deleted user.
+ * @param {IdOrIdsInput['ids']} ids - An array of IDs of users to delete.
+ * @returns {Promise<Partial<IUser>[]>} - The deleted users.
  */
 const deleteManyUser = async (ids: IdOrIdsInput['ids']): Promise<Partial<IUser>[]> => {
   const userToDelete = await UserModel.find({ _id: { $in: ids } });
-  if (!userToDelete.length) throw new Error('No user found to delete');
+  if (!userToDelete.length) throw new Error('No User found to delete');
   await UserModel.deleteMany({ _id: { $in: ids } });
   return userToDelete; 
 };
@@ -139,7 +149,7 @@ const getUserById = async (id: IdOrIdsInput['id']): Promise<Partial<IUser | null
  * Service function to retrieve multiple user based on query parameters.
  *
  * @param {SearchQueryInput} query - The query parameters for filtering user.
- * @returns {Promise<Partial<IUser>[]>} - The retrieved user
+ * @returns {Promise<Partial<IUser>[]>} - The retrieved users.
  */
 const getManyUser = async (query: SearchQueryInput): Promise<{ users: Partial<IUser>[]; totalData: number; totalPages: number }> => {
   const { searchKey = '', showPerPage = 10, pageNo = 1 } = query;
@@ -152,11 +162,11 @@ const getManyUser = async (query: SearchQueryInput): Promise<{ users: Partial<IU
   };
   // Calculate the number of items to skip based on the page number
   const skipItems = (pageNo - 1) * showPerPage;
-  // Find the total count of matching user
+  // Find the total count of matching users
   const totalData = await UserModel.countDocuments(searchFilter);
   // Calculate the total number of pages
   const totalPages = Math.ceil(totalData / showPerPage);
-  // Find user based on the search filter with pagination
+  // Find users based on the search filter with pagination
   const users = await UserModel.find(searchFilter)
     .skip(skipItems)
     .limit(showPerPage)

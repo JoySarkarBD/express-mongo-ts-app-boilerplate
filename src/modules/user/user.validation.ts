@@ -5,7 +5,7 @@ import { validateBody } from '../../handlers/zod-error-handler';
 /**
  * User Validation Schemas and Types
  *
- * This module defines Zod schemas for validating user-related
+ * This module defines Zod schemas for validating user related
  * requests such as creation (single + bulk) and updates (single + bulk).
  * It also exports corresponding TypeScript types inferred from these schemas.
  * Each schema includes detailed validation rules and custom error messages
@@ -22,7 +22,7 @@ import { validateBody } from '../../handlers/zod-error-handler';
 const zodCreateUserSchema = z
   .object({
     // Example fields — replace / expand as needed:
-    // name: z.string({ message: 'User name is required' }).min(2, 'Name must be at least 2 characters').max(100),
+    // name: z.string({ message: 'Name is required' }).min(2, 'Name must be at least 2 characters').max(100),
     // email: z.string().email({ message: 'Invalid email format' }),
     // age: z.number().int().positive().optional(),
     // status: z.enum(['active', 'inactive', 'pending']).default('pending'),
