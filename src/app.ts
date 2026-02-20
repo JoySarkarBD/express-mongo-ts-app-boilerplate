@@ -29,7 +29,6 @@ const app: Application = express();
 // Define the path to the public directory
 const publicDirPath = path.join(__dirname, '..', 'public');
 
-// Middleware setup
 app.use(express.json({ limit: config.MAX_JSON_SIZE }));
 
 app.use(express.urlencoded({ extended: config.URL_ENCODED }));
